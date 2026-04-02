@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { CaretDown, CaretRight } from "@phosphor-icons/react";
 
 interface SectionBaseProps {
   title: string;
@@ -22,12 +22,12 @@ export function SectionBase({
     <div className="rounded-lg border border-border bg-background overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-4 py-3 text-sm font-medium hover:bg-surface-2 transition-colors"
+        className="w-full flex items-center gap-2 px-4 py-3 text-sm font-medium hover:bg-secondary transition-colors"
       >
         {open ? (
-          <ChevronDown className="w-4 h-4 text-muted shrink-0" />
+          <CaretDown size={14} className="text-muted-foreground shrink-0" />
         ) : (
-          <ChevronRight className="w-4 h-4 text-muted shrink-0" />
+          <CaretRight size={14} className="text-muted-foreground shrink-0" />
         )}
         {icon && <span className="shrink-0">{icon}</span>}
         <span>{title}</span>
@@ -74,7 +74,7 @@ export function Input({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full px-3 py-2 text-sm bg-surface-1 border border-border rounded-md outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+      className="w-full px-3 py-2 text-sm bg-card border border-border rounded-md outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
     />
   );
 }
@@ -99,7 +99,7 @@ export function TextArea({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="w-full px-3 py-2 text-sm bg-surface-1 border border-border rounded-md outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
+      className="w-full px-3 py-2 text-sm bg-card border border-border rounded-md outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
     />
   );
 }

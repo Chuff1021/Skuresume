@@ -1,6 +1,6 @@
 "use client";
 
-import { User } from "lucide-react";
+import { User } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
 import { SectionBase, Field, Input } from "../section-base";
 
@@ -21,7 +21,7 @@ export function BasicsSection() {
   return (
     <SectionBase
       title="Basics"
-      icon={<User className="w-4 h-4" />}
+      icon={<User size={16} />}
       defaultOpen
     >
       <div className="grid grid-cols-2 gap-3">

@@ -45,7 +45,7 @@ export function ResumePreview() {
   return (
     <div
       ref={containerRef}
-      className="flex-1 bg-surface-2 flex items-center justify-center overflow-auto p-6"
+      className="flex-1 bg-secondary flex items-center justify-center overflow-auto p-6"
     >
       <div
         style={{

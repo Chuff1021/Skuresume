@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 // react-resizable-panels deferred to Phase 3 — using fixed-width sidebars for now
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileText } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
 import { useBuilderStore } from "@/stores/builder";
 import { useAutosave } from "@/hooks/use-autosave";
@@ -68,13 +68,13 @@ export default function BuilderPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <FileText className="w-12 h-12 text-muted mx-auto mb-4" />
+          <FileText size={48} className="text-muted-foreground mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Resume not found</h2>
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft size={16} />
             Back to Dashboard
           </Link>
         </div>

@@ -3,15 +3,17 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
 import {
   FileText,
   Plus,
-  Trash2,
-  MoreHorizontal,
+  Trash,
+  DotsThree,
   Copy,
-  ExternalLink,
-  Pencil,
-} from "lucide-react";
+  ArrowSquareOut,
+  PencilSimple,
+  House,
+} from "@phosphor-icons/react";
 
 interface Resume {
   id: string;
@@ -105,157 +107,185 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-surface-1">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <FileText className="w-6 h-6 text-primary" />
-            <span className="text-lg font-semibold">SKU AI Resume Builder</span>
-          </Link>
-        </div>
-      </header>
-
-      {/* Content */}
-      <main className="max-w-6xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold">Your Resumes</h1>
-            <p className="text-muted text-sm mt-1">
-              Create, edit, and manage your resumes
-            </p>
+      <header className="border-b border-border bg-popover">
+        <div className="container mx-auto flex items-center justify-between px-4 py-3 lg:px-12">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center size-8 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-secondary"
+            >
+              <House size={18} />
+            </Link>
+            <div className="h-5 w-px bg-border" />
+            <Link href="/" className="flex items-center gap-2">
+              <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm">
+                S
+              </div>
+              <span className="font-semibold text-sm hidden sm:inline">SKU AI Resume Builder</span>
+            </Link>
           </div>
           <button
             onClick={createResume}
             disabled={creating}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            <Plus className="w-4 h-4" />
+            <Plus size={16} />
             {creating ? "Creating..." : "New Resume"}
           </button>
         </div>
+      </header>
+
+      {/* Content */}
+      <main className="container mx-auto px-4 py-8 lg:px-12">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Resumes</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Create, edit, and manage your resumes
+          </p>
+        </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-64 rounded-xl bg-surface-1 border border-border animate-pulse"
+                className="aspect-page rounded-md bg-card border border-border animate-pulse"
               />
             ))}
           </div>
         ) : resumes.length === 0 ? (
           <div className="text-center py-24">
-            <div className="w-16 h-16 rounded-full bg-surface-2 flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-8 h-8 text-muted" />
+            <div className="mx-auto mb-4 size-16 rounded-full bg-secondary flex items-center justify-center">
+              <FileText size={32} className="text-muted-foreground" />
             </div>
             <h2 className="text-xl font-semibold mb-2">No resumes yet</h2>
-            <p className="text-muted mb-6">
+            <p className="text-muted-foreground mb-6 text-sm">
               Create your first resume to get started
             </p>
             <button
               onClick={createResume}
               disabled={creating}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
             >
-              <Plus className="w-4 h-4" />
+              <Plus size={16} />
               {creating ? "Creating..." : "Create Resume"}
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {/* Create new card */}
-            <button
+            <motion.button
               onClick={createResume}
               disabled={creating}
-              className="h-64 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-surface-1 transition-colors flex flex-col items-center justify-center gap-3 group"
+              className="aspect-page rounded-md border-2 border-dashed border-border hover:border-primary/30 transition-colors flex flex-col items-center justify-center gap-3 group"
+              whileHover={{ y: -2, scale: 1.005 }}
+              whileTap={{ scale: 0.995 }}
+              transition={{ type: "spring", stiffness: 320, damping: 28 }}
             >
-              <div className="w-12 h-12 rounded-full bg-surface-2 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                <Plus className="w-6 h-6 text-muted group-hover:text-primary transition-colors" />
+              <div className="size-12 rounded-full bg-secondary group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <Plus size={24} className="text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
-              <span className="text-sm font-medium text-muted group-hover:text-foreground transition-colors">
+              <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                 {creating ? "Creating..." : "New Resume"}
               </span>
-            </button>
+            </motion.button>
 
             {/* Resume cards */}
-            {resumes.map((resume) => (
-              <div
+            {resumes.map((resume, i) => (
+              <motion.div
                 key={resume.id}
-                className="relative h-64 rounded-xl bg-surface-1 border border-border hover:border-primary/30 transition-colors overflow-hidden group"
+                className="group relative aspect-page rounded-md bg-popover shadow overflow-hidden border border-border hover:shadow-xl transition-shadow"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.05 }}
+                whileHover={{ y: -2, scale: 1.005 }}
+                whileTap={{ scale: 0.995 }}
               >
                 {/* Preview area */}
                 <Link
                   href={`/builder/${resume.id}`}
-                  className="block h-40 bg-surface-2 relative"
+                  className="block absolute inset-0"
                 >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-20 h-28 bg-white rounded shadow-sm border flex items-center justify-center">
-                      <FileText className="w-8 h-8 text-surface-3" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-card">
+                    <div className="w-3/5 aspect-page bg-white rounded shadow-sm border flex items-center justify-center">
+                      <FileText size={32} className="text-muted-foreground/20" />
                     </div>
                   </div>
+                  {/* Hover overlay */}
                   <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <span className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium flex items-center gap-1.5">
-                      <Pencil className="w-3 h-3" />
+                    <span className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium flex items-center gap-1.5">
+                      <PencilSimple size={12} />
                       Edit
                     </span>
                   </div>
                 </Link>
 
-                {/* Info */}
-                <div className="p-4 flex items-center justify-between">
+                {/* Footer */}
+                <div className="absolute bottom-0 inset-x-0 bg-background/40 backdrop-blur-sm p-3 flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <h3 className="font-medium text-sm truncate">
                       {resume.name}
                     </h3>
-                    <p className="text-xs text-muted mt-0.5">
-                      Updated {formatDate(resume.updatedAt)}
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Last updated {formatDate(resume.updatedAt)}
                     </p>
                   </div>
 
                   {/* Menu */}
                   <div className="relative">
                     <button
-                      onClick={() =>
-                        setMenuOpen(menuOpen === resume.id ? null : resume.id)
-                      }
-                      className="w-8 h-8 rounded-md hover:bg-surface-2 flex items-center justify-center transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setMenuOpen(menuOpen === resume.id ? null : resume.id);
+                      }}
+                      className="size-8 rounded-md hover:bg-secondary flex items-center justify-center transition-colors"
                     >
-                      <MoreHorizontal className="w-4 h-4 text-muted" />
+                      <DotsThree size={18} className="text-muted-foreground" />
                     </button>
-                    {menuOpen === resume.id && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-10"
-                          onClick={() => setMenuOpen(null)}
-                        />
-                        <div className="absolute right-0 bottom-full mb-1 z-20 w-44 bg-surface-1 border border-border rounded-lg shadow-lg py-1">
-                          <Link
-                            href={`/builder/${resume.id}`}
-                            className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface-2 transition-colors"
+                    <AnimatePresence>
+                      {menuOpen === resume.id && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-10"
                             onClick={() => setMenuOpen(null)}
+                          />
+                          <motion.div
+                            className="absolute right-0 bottom-full mb-1 z-20 w-44 bg-popover border border-border rounded-md shadow-lg py-1"
+                            initial={{ opacity: 0, y: 4, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+                            transition={{ duration: 0.15 }}
                           >
-                            <ExternalLink className="w-4 h-4" />
-                            Open
-                          </Link>
-                          <button
-                            onClick={() => duplicateResume(resume)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface-2 transition-colors"
-                          >
-                            <Copy className="w-4 h-4" />
-                            Duplicate
-                          </button>
-                          <button
-                            onClick={() => deleteResume(resume.id)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger/10 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Delete
-                          </button>
-                        </div>
-                      </>
-                    )}
+                            <Link
+                              href={`/builder/${resume.id}`}
+                              className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors"
+                              onClick={() => setMenuOpen(null)}
+                            >
+                              <ArrowSquareOut size={16} />
+                              Open
+                            </Link>
+                            <button
+                              onClick={() => duplicateResume(resume)}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors"
+                            >
+                              <Copy size={16} />
+                              Duplicate
+                            </button>
+                            <button
+                              onClick={() => deleteResume(resume.id)}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                            >
+                              <Trash size={16} />
+                              Delete
+                            </button>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}

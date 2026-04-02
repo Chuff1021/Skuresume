@@ -1,6 +1,6 @@
 "use client";
 
-import { Wrench, Plus, Trash2, GripVertical } from "lucide-react";
+import { Wrench, Plus, Trash, DotsSixVertical as GripVertical } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
 import { SectionBase, Field, Input } from "../section-base";
 import type { SkillItem } from "@/types/resume";
@@ -48,25 +48,25 @@ export function SkillsSection() {
   };
 
   return (
-    <SectionBase title="Skills" icon={<Wrench className="w-4 h-4" />}>
+    <SectionBase title="Skills" icon={<Wrench size={16} />}>
       <div className="space-y-3">
         {items.map((item) => (
           <div
             key={item.id}
-            className="p-3 rounded-lg bg-surface-1 border border-border space-y-2"
+            className="p-3 rounded-lg bg-card border border-border space-y-2"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <GripVertical className="w-4 h-4 text-muted cursor-grab" />
+                <GripVertical size={16} className="text-muted-foreground cursor-grab" />
                 <span className="text-xs font-medium text-muted">
                   {item.name || "New Skill"}
                 </span>
               </div>
               <button
                 onClick={() => removeItem(item.id)}
-                className="w-6 h-6 rounded hover:bg-danger/10 flex items-center justify-center transition-colors"
+                className="w-6 h-6 rounded hover:bg-destructive/10 flex items-center justify-center transition-colors"
               >
-                <Trash2 className="w-3.5 h-3.5 text-danger" />
+                <Trash size={14} className="text-destructive" />
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -113,7 +113,7 @@ export function SkillsSection() {
           onClick={addItem}
           className="w-full flex items-center justify-center gap-2 py-2 text-sm text-primary hover:bg-primary/5 rounded-lg border border-dashed border-primary/30 transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <Plus size={16} />
           Add Skill
         </button>
       </div>

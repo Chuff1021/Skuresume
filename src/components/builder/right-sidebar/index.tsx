@@ -1,38 +1,38 @@
 "use client";
 
-import { Palette, Layout, Type, FileDown } from "lucide-react";
+import { Palette, Layout, TextAa, FileArrowDown } from "@phosphor-icons/react";
 
 export function RightSidebar() {
   return (
-    <div className="h-full overflow-y-auto bg-surface-1">
+    <div className="h-full overflow-y-auto bg-background">
       <div className="p-4 space-y-2">
-        <SidebarSection icon={<Layout className="w-4 h-4" />} title="Template">
+        <SidebarSection icon={<Layout size={16} />} title="Template">
           <div className="grid grid-cols-2 gap-2">
-            <div className="aspect-[3/4] rounded-md bg-primary/10 border-2 border-primary flex items-center justify-center">
+            <div className="aspect-page rounded-md bg-primary/10 border-2 border-primary flex items-center justify-center">
               <span className="text-[10px] font-medium text-primary">Onyx</span>
             </div>
             {["Ditto", "Gengar", "Pikachu", "Glalie", "Kakuna"].map((name) => (
               <div
                 key={name}
-                className="aspect-[3/4] rounded-md bg-surface-2 border border-border flex items-center justify-center opacity-50 cursor-not-allowed"
+                className="aspect-page rounded-md bg-secondary border border-border flex items-center justify-center opacity-50 cursor-not-allowed"
               >
-                <span className="text-[10px] font-medium text-muted">{name}</span>
+                <span className="text-[10px] font-medium text-muted-foreground">{name}</span>
               </div>
             ))}
           </div>
-          <p className="text-[10px] text-muted mt-2">More templates coming in Phase 3</p>
+          <p className="text-[10px] text-muted-foreground mt-2">More templates coming soon</p>
         </SidebarSection>
 
-        <SidebarSection icon={<Palette className="w-4 h-4" />} title="Colors">
-          <p className="text-xs text-muted">Color customization coming soon</p>
+        <SidebarSection icon={<Palette size={16} />} title="Colors">
+          <p className="text-xs text-muted-foreground">Color customization coming soon</p>
         </SidebarSection>
 
-        <SidebarSection icon={<Type className="w-4 h-4" />} title="Typography">
-          <p className="text-xs text-muted">Font customization coming soon</p>
+        <SidebarSection icon={<TextAa size={16} />} title="Typography">
+          <p className="text-xs text-muted-foreground">Font customization coming soon</p>
         </SidebarSection>
 
-        <SidebarSection icon={<FileDown className="w-4 h-4" />} title="Export">
-          <p className="text-xs text-muted">PDF export coming in Phase 4</p>
+        <SidebarSection icon={<FileArrowDown size={16} />} title="Export">
+          <p className="text-xs text-muted-foreground">PDF export coming soon</p>
         </SidebarSection>
       </div>
     </div>
@@ -49,7 +49,7 @@ function SidebarSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-background overflow-hidden">
+    <div className="rounded-md border border-border bg-card overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-3 text-sm font-medium">
         {icon}
         <span>{title}</span>

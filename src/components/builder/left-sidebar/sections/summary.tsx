@@ -1,6 +1,6 @@
 "use client";
 
-import { AlignLeft } from "lucide-react";
+import { TextAlignLeft as AlignLeft } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
 import { SectionBase, TextArea } from "../section-base";
 
@@ -13,7 +13,7 @@ export function SummarySection() {
   return (
     <SectionBase
       title="Summary"
-      icon={<AlignLeft className="w-4 h-4" />}
+      icon={<AlignLeft size={16} />}
       defaultOpen
     >
       <TextArea

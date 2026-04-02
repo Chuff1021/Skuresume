@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import {
-  ArrowLeft,
+  House,
   FileText,
-  Undo2,
-  Redo2,
+  ArrowUUpLeft,
+  ArrowUUpRight,
   Check,
-  Loader2,
-  PanelLeft,
-  PanelRight,
-} from "lucide-react";
+  CircleNotch,
+  SidebarSimple,
+  CaretDown,
+} from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
 import { useBuilderStore } from "@/stores/builder";
 
@@ -28,40 +28,41 @@ export function BuilderHeader() {
         : "";
 
   return (
-    <header className="h-12 border-b border-border bg-surface-1 flex items-center px-3 gap-2 shrink-0">
-      <Link
-        href="/dashboard"
-        className="w-8 h-8 rounded-md hover:bg-surface-2 flex items-center justify-center transition-colors"
-        title="Back to Dashboard"
+    <header className="h-14 border-b border-border bg-popover flex items-center px-3 gap-2 shrink-0 z-10">
+      {/* Left sidebar toggle */}
+      <button
+        onClick={toggleLeftSidebar}
+        className="size-8 rounded-md hover:bg-secondary flex items-center justify-center transition-colors"
+        title="Toggle left sidebar"
       >
-        <ArrowLeft className="w-4 h-4" />
-      </Link>
+        <SidebarSimple size={18} />
+      </button>
 
       <div className="w-px h-5 bg-border mx-1" />
 
-      <button
-        onClick={toggleLeftSidebar}
-        className="w-8 h-8 rounded-md hover:bg-surface-2 flex items-center justify-center transition-colors"
-        title="Toggle left sidebar"
-      >
-        <PanelLeft className="w-4 h-4" />
-      </button>
-
+      {/* Breadcrumb */}
       <div className="flex items-center gap-2 min-w-0 flex-1">
-        <FileText className="w-4 h-4 text-primary shrink-0" />
+        <Link
+          href="/dashboard"
+          className="size-7 rounded-md hover:bg-secondary flex items-center justify-center transition-colors shrink-0"
+          title="Dashboard"
+        >
+          <House size={16} />
+        </Link>
+        <span className="text-muted-foreground text-sm">/</span>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="text-sm font-medium bg-transparent border-none outline-none min-w-0 flex-1 hover:bg-surface-2 focus:bg-surface-2 px-1.5 py-1 rounded transition-colors"
+          className="text-sm font-medium bg-transparent border-none outline-none min-w-0 flex-1 hover:bg-secondary focus:bg-secondary px-1.5 py-1 rounded-md transition-colors truncate"
         />
       </div>
 
       {/* Save status */}
-      <div className="flex items-center gap-1.5 text-xs text-muted shrink-0">
-        {isSaving && <Loader2 className="w-3 h-3 animate-spin" />}
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
+        {isSaving && <CircleNotch size={12} className="animate-spin" />}
         {!isSaving && !isDirty && lastSavedAt && (
-          <Check className="w-3 h-3 text-success" />
+          <Check size={12} weight="bold" className="text-success" />
         )}
         <span>{saveStatus}</span>
       </div>
@@ -71,25 +72,28 @@ export function BuilderHeader() {
       {/* Undo / Redo */}
       <button
         onClick={() => undo()}
-        className="w-8 h-8 rounded-md hover:bg-surface-2 flex items-center justify-center transition-colors"
+        className="size-8 rounded-md hover:bg-secondary flex items-center justify-center transition-colors"
         title="Undo"
       >
-        <Undo2 className="w-4 h-4" />
+        <ArrowUUpLeft size={18} />
       </button>
       <button
         onClick={() => redo()}
-        className="w-8 h-8 rounded-md hover:bg-surface-2 flex items-center justify-center transition-colors"
+        className="size-8 rounded-md hover:bg-secondary flex items-center justify-center transition-colors"
         title="Redo"
       >
-        <Redo2 className="w-4 h-4" />
+        <ArrowUUpRight size={18} />
       </button>
 
+      <div className="w-px h-5 bg-border mx-1" />
+
+      {/* Right sidebar toggle */}
       <button
         onClick={toggleRightSidebar}
-        className="w-8 h-8 rounded-md hover:bg-surface-2 flex items-center justify-center transition-colors"
+        className="size-8 rounded-md hover:bg-secondary flex items-center justify-center transition-colors"
         title="Toggle right sidebar"
       >
-        <PanelRight className="w-4 h-4" />
+        <SidebarSimple size={18} className="scale-x-[-1]" />
       </button>
     </header>
   );
