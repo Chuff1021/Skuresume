@@ -5,15 +5,20 @@ import { MarqueeRows } from "@/components/animation/marquee";
 import { createSampleResumeData } from "@/lib/resume-sample";
 import { getTemplate, templateList } from "@/components/resume/templates";
 
-// Additional template names that don't have implementations yet (shown as wireframes)
-const upcomingTemplates = ["Chikorita", "Ditgar", "Glalie", "Kakuna", "Lapras", "Leafish", "Azurill", "Rhyhorn"];
-
 const templateConfigs: Record<string, { primary: string }> = {
   onyx: { primary: "#2563eb" },
   ditto: { primary: "#6366f1" },
   gengar: { primary: "#8b5cf6" },
   pikachu: { primary: "#eab308" },
   bronzor: { primary: "#ef4444" },
+  azurill: { primary: "#06b6d4" },
+  chikorita: { primary: "#22c55e" },
+  glalie: { primary: "#0ea5e9" },
+  kakuna: { primary: "#f59e0b" },
+  rhyhorn: { primary: "#a855f7" },
+  leafish: { primary: "#10b981" },
+  lapras: { primary: "#3b82f6" },
+  ditgar: { primary: "#ec4899" },
 };
 
 function RealTemplateCard({ templateId, name }: { templateId: string; name: string }) {
@@ -48,62 +53,11 @@ function RealTemplateCard({ templateId, name }: { templateId: string; name: stri
   );
 }
 
-function WireframeTemplateCard({ name }: { name: string }) {
-  const hue = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
-
-  return (
-    <motion.div
-      className="group relative aspect-page w-48 sm:w-56 md:w-64 lg:w-72 shrink-0 rounded-md border border-border bg-white shadow-lg overflow-hidden cursor-pointer"
-      style={{ minHeight: 280 }}
-      whileHover={{ scale: 1.06, zIndex: 20 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 320, damping: 26 }}
-    >
-      <div className="absolute inset-0 p-3 sm:p-4 flex flex-col">
-        <div className="text-center mb-3">
-          <div className="h-2.5 w-24 rounded-full bg-zinc-800 mx-auto" />
-          <div className="h-1.5 w-16 rounded-full bg-zinc-400 mx-auto mt-1.5" />
-          <div className="flex justify-center gap-1.5 mt-2">
-            <div className="h-1 w-10 rounded-full bg-zinc-300" />
-            <div className="h-1 w-8 rounded-full bg-zinc-300" />
-            <div className="h-1 w-12 rounded-full bg-zinc-300" />
-          </div>
-        </div>
-        <div className="h-px w-full mb-2" style={{ background: `hsl(${hue}, 50%, 50%, 0.3)` }} />
-        <div className="space-y-2 flex-1">
-          <div className="h-1.5 w-12 rounded-full" style={{ background: `hsl(${hue}, 50%, 50%)` }} />
-          <div className="h-1 w-full rounded-full bg-zinc-200" />
-          <div className="h-1 w-4/5 rounded-full bg-zinc-200" />
-          <div className="h-1.5 w-14 rounded-full mt-2" style={{ background: `hsl(${hue}, 50%, 50%)` }} />
-          <div className="h-1 w-full rounded-full bg-zinc-200" />
-          <div className="h-1 w-5/6 rounded-full bg-zinc-200" />
-          <div className="h-1 w-3/4 rounded-full bg-zinc-200" />
-          <div className="h-1.5 w-10 rounded-full mt-2" style={{ background: `hsl(${hue}, 50%, 50%)` }} />
-          <div className="h-1 w-full rounded-full bg-zinc-200" />
-          <div className="h-1 w-2/3 rounded-full bg-zinc-200" />
-        </div>
-      </div>
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
-      <div className="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-        <span className="text-sm font-medium text-white drop-shadow-lg">{name}</span>
-        <span className="text-xs text-white/60 ml-2">Coming Soon</span>
-      </div>
-    </motion.div>
-  );
-}
-
 export function TemplatesShowcase() {
-  // Real templates first, then wireframes
-  const realCards = templateList.map((t) => (
+  const allCards = templateList.map((t) => (
     <RealTemplateCard key={t.id} templateId={t.id} name={t.name} />
   ));
-  const wireframeCards = upcomingTemplates.map((name) => (
-    <WireframeTemplateCard key={name} name={name} />
-  ));
 
-  const allCards = [...realCards, ...wireframeCards];
   const row1 = allCards.slice(0, Math.ceil(allCards.length / 2));
   const row2 = allCards.slice(Math.ceil(allCards.length / 2));
 
@@ -117,7 +71,7 @@ export function TemplatesShowcase() {
         transition={{ duration: 0.6 }}
       >
         <h2 className="text-2xl font-semibold tracking-tight md:text-4xl xl:text-5xl">
-          Professional Templates
+          13 Professional Templates
         </h2>
         <p className="mt-4 text-muted-foreground max-w-lg mx-auto">
           Each template is designed to be ATS-friendly and visually striking.

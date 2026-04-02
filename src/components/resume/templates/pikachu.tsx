@@ -2,136 +2,70 @@
 
 import type { ResumeData } from "@/types/resume";
 
-// Pikachu: Two-column layout with colored header band
+// Pikachu: Two-column sidebar LEFT, colored rounded header box in main column
 export function PikachuTemplate({ data }: { data: ResumeData }) {
   const { basics, summary, sections, metadata } = data;
-  const { colors } = metadata.design;
-  const { body: bf, heading: hf } = metadata.typography;
+  const c = metadata.design.colors;
+  const bf = metadata.typography.body;
+  const hf = metadata.typography.heading;
   const m = metadata.page;
+  const sw = metadata.layout.sidebarWidth;
 
   return (
-    <div className="w-full h-full overflow-hidden" style={{ fontFamily: bf.fontFamily, fontSize: bf.fontSize, lineHeight: bf.lineHeight, color: colors.text, backgroundColor: colors.background }}>
-      {/* Header band */}
-      <div style={{ backgroundColor: colors.primary, color: "#ffffff", padding: `${m.marginY * 0.8}px ${m.marginX}px` }}>
-        <h1 style={{ fontFamily: hf.fontFamily, fontWeight: hf.fontWeight, fontSize: hf.fontSize * 1.8, lineHeight: 1.1, color: "#fff" }}>
-          {basics.name || "Your Name"}
-        </h1>
-        {basics.headline && <p style={{ fontSize: bf.fontSize + 1, opacity: 0.9, marginTop: 4 }}>{basics.headline}</p>}
-        <div className="flex flex-wrap gap-4 mt-3" style={{ fontSize: bf.fontSize - 2, opacity: 0.85 }}>
-          {basics.email && <span>{basics.email}</span>}
-          {basics.phone && <span>{basics.phone}</span>}
-          {basics.location && <span>{basics.location}</span>}
-          {basics.url.url && <span>{basics.url.url}</span>}
+    <div className="w-full h-full overflow-hidden" style={{ fontFamily: bf.fontFamily, fontSize: bf.fontSize, lineHeight: bf.lineHeight, color: c.text, backgroundColor: c.background, padding: `${m.marginY}px ${m.marginX}px` }}>
+      <div style={{ display: "flex", gap: m.gapX }}>
+        {/* Sidebar LEFT */}
+        <div style={{ width: `${sw}%`, display: "flex", flexDirection: "column", gap: m.gapY }}>
+          {/* Picture */}
+          {data.picture.url && !data.picture.effects.hidden && (
+            <img src={data.picture.url} alt="" style={{ width: "100%", borderRadius: data.picture.borderRadius, objectFit: "cover" }} />
+          )}
+          {["skills", "languages", "interests", "certifications", "profiles"].map(k => {
+            const s = sections[k as keyof typeof sections];
+            if (!s || !s.visible || s.items.length === 0) return null;
+            return <div key={k}><H t={s.name} c={c} hf={hf} /><SideItems k={k} items={s.items.filter((i: any) => !i.hidden)} c={c} bf={bf} /></div>;
+          })}
         </div>
-      </div>
 
-      {/* Two columns */}
-      <div className="flex" style={{ padding: `${m.gapY}px ${m.marginX}px ${m.marginY}px`, gap: m.gapX }}>
         {/* Main */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: m.gapY }}>
-          {summary && (
-            <Sec title="Profile" color={colors.primary} hf={hf}>
-              <p style={{ fontSize: bf.fontSize - 1 }}>{summary}</p>
-            </Sec>
-          )}
+          {/* Colored header box */}
+          <div style={{ backgroundColor: c.primary, color: c.background, padding: `${m.marginY * 0.8}px ${m.marginX * 0.8}px`, borderRadius: data.picture.borderRadius || 8 }}>
+            <h1 style={{ fontFamily: hf.fontFamily, fontWeight: hf.fontWeight, fontSize: hf.fontSize * 1.5, lineHeight: 1.1, color: c.background }}>{basics.name || "Your Name"}</h1>
+            {basics.headline && <p style={{ fontSize: bf.fontSize + 1, opacity: 0.85, marginTop: 2 }}>{basics.headline}</p>}
+            <div style={{ borderTop: `1px solid ${c.background}50`, marginTop: 8, paddingTop: 8, display: "flex", flexWrap: "wrap", gap: "0 12px", fontSize: bf.fontSize - 2, opacity: 0.85 }}>
+              {basics.email && <span>{basics.email}</span>}
+              {basics.phone && <span>{basics.phone}</span>}
+              {basics.location && <span>{basics.location}</span>}
+              {basics.url.url && <span>{basics.url.url}</span>}
+            </div>
+          </div>
 
-          {sections.experience.visible && sections.experience.items.length > 0 && (
-            <Sec title={sections.experience.name} color={colors.primary} hf={hf}>
-              {sections.experience.items.filter(i => !i.hidden).map(item => (
-                <div key={item.id} style={{ marginBottom: 10 }}>
-                  <div style={{ fontWeight: 700, fontSize: bf.fontSize }}>{item.position}</div>
-                  <div style={{ color: colors.primary, fontSize: bf.fontSize - 1 }}>{item.company}{item.location && ` — ${item.location}`}</div>
-                  <div style={{ fontSize: bf.fontSize - 2, opacity: 0.5, marginTop: 2 }}>{item.date}</div>
-                  {item.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 4, whiteSpace: "pre-wrap" }}>{item.description}</p>}
-                </div>
-              ))}
-            </Sec>
-          )}
-
-          {sections.education.visible && sections.education.items.length > 0 && (
-            <Sec title={sections.education.name} color={colors.primary} hf={hf}>
-              {sections.education.items.filter(i => !i.hidden).map(item => (
-                <div key={item.id} style={{ marginBottom: 8 }}>
-                  <div style={{ fontWeight: 700 }}>{item.studyType}{item.area && ` in ${item.area}`}</div>
-                  <div style={{ color: colors.primary, fontSize: bf.fontSize - 1 }}>{item.institution}</div>
-                  <div style={{ fontSize: bf.fontSize - 2, opacity: 0.5 }}>{item.date}{item.score && ` — GPA: ${item.score}`}</div>
-                  {item.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 2, whiteSpace: "pre-wrap" }}>{item.description}</p>}
-                </div>
-              ))}
-            </Sec>
-          )}
-
-          {sections.projects.visible && sections.projects.items.length > 0 && (
-            <Sec title={sections.projects.name} color={colors.primary} hf={hf}>
-              {sections.projects.items.filter(i => !i.hidden).map(item => (
-                <div key={item.id} style={{ marginBottom: 6 }}>
-                  <div style={{ fontWeight: 600 }}>{item.name}</div>
-                  {item.date && <div style={{ fontSize: bf.fontSize - 2, opacity: 0.5 }}>{item.date}</div>}
-                  {item.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 2, whiteSpace: "pre-wrap" }}>{item.description}</p>}
-                </div>
-              ))}
-            </Sec>
-          )}
-        </div>
-
-        {/* Sidebar */}
-        <div style={{ width: `${metadata.layout.sidebarWidth}%`, display: "flex", flexDirection: "column", gap: m.gapY }}>
-          {sections.skills.visible && sections.skills.items.length > 0 && (
-            <Sec title={sections.skills.name} color={colors.primary} hf={hf}>
-              {sections.skills.items.filter(i => !i.hidden).map(item => (
-                <div key={item.id} style={{ marginBottom: 6 }}>
-                  <div className="flex justify-between" style={{ fontSize: bf.fontSize - 1 }}>
-                    <span style={{ fontWeight: 600 }}>{item.name}</span>
-                  </div>
-                  <div style={{ height: 5, borderRadius: 3, backgroundColor: `${colors.primary}15`, marginTop: 3 }}>
-                    <div style={{ height: "100%", borderRadius: 3, backgroundColor: colors.primary, width: `${(item.level / 5) * 100}%` }} />
-                  </div>
-                </div>
-              ))}
-            </Sec>
-          )}
-
-          {sections.languages.visible && sections.languages.items.length > 0 && (
-            <Sec title={sections.languages.name} color={colors.primary} hf={hf}>
-              {sections.languages.items.filter(i => !i.hidden).map(item => (
-                <div key={item.id} style={{ fontSize: bf.fontSize - 1, marginBottom: 3 }}>
-                  <strong>{item.name}</strong>{item.description && <span style={{ opacity: 0.6 }}> — {item.description}</span>}
-                </div>
-              ))}
-            </Sec>
-          )}
-
-          {sections.interests.visible && sections.interests.items.length > 0 && (
-            <Sec title={sections.interests.name} color={colors.primary} hf={hf}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                {sections.interests.items.filter(i => !i.hidden).map(item => (
-                  <span key={item.id} style={{ padding: "2px 8px", borderRadius: 4, backgroundColor: `${colors.primary}10`, color: colors.primary, fontSize: bf.fontSize - 2 }}>{item.name}</span>
-                ))}
-              </div>
-            </Sec>
-          )}
-
-          {sections.certifications.visible && sections.certifications.items.length > 0 && (
-            <Sec title={sections.certifications.name} color={colors.primary} hf={hf}>
-              {sections.certifications.items.filter(i => !i.hidden).map(item => (
-                <div key={item.id} style={{ marginBottom: 4, fontSize: bf.fontSize - 1 }}>
-                  <div style={{ fontWeight: 600 }}>{item.name}</div>
-                  {item.issuer && <div style={{ opacity: 0.6, fontSize: bf.fontSize - 2 }}>{item.issuer}{item.date && ` — ${item.date}`}</div>}
-                </div>
-              ))}
-            </Sec>
-          )}
+          {summary && <div><H t="Summary" c={c} hf={hf} /><p style={{ fontSize: bf.fontSize - 1, whiteSpace: "pre-wrap" }}>{summary}</p></div>}
+          {["experience", "education", "projects", "volunteer", "awards", "publications", "references"].map(k => {
+            const s = sections[k as keyof typeof sections];
+            if (!s || !s.visible || s.items.length === 0) return null;
+            return <div key={k}><H t={s.name} c={c} hf={hf} /><MainItems k={k} items={s.items.filter((i: any) => !i.hidden)} c={c} bf={bf} /></div>;
+          })}
         </div>
       </div>
     </div>
   );
 }
 
-function Sec({ title, color, hf, children }: { title: string; color: string; hf: { fontFamily: string; fontWeight: number; fontSize: number }; children: React.ReactNode }) {
-  return (
-    <div>
-      <div style={{ fontFamily: hf.fontFamily, fontWeight: hf.fontWeight, fontSize: hf.fontSize * 0.85, color, marginBottom: 8, paddingBottom: 4, borderBottom: `2px solid ${color}` }}>{title}</div>
-      {children}
-    </div>
-  );
+function H({ t, c, hf }: { t: string; c: { primary: string }; hf: { fontFamily: string; fontWeight: number; fontSize: number } }) {
+  return <h6 style={{ fontFamily: hf.fontFamily, fontWeight: hf.fontWeight, fontSize: hf.fontSize * 0.75, color: c.primary, borderBottom: `2px solid ${c.primary}`, paddingBottom: 3, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>{t}</h6>;
+}
+
+function SideItems({ k, items, c, bf }: { k: string; items: any[]; c: { primary: string }; bf: { fontSize: number } }) {
+  if (k === "skills") return <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>{items.map(i => <div key={i.id}><div style={{ fontSize: bf.fontSize - 1, fontWeight: 600 }}>{i.name}</div><div style={{ display: "flex", gap: 2, marginTop: 3 }}>{Array.from({ length: 5 }).map((_, j) => <div key={j} style={{ flex: 1, height: 5, borderRadius: 3, backgroundColor: j < i.level ? c.primary : `${c.primary}15` }} />)}</div></div>)}</div>;
+  if (k === "languages") return <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>{items.map(i => <div key={i.id} style={{ fontSize: bf.fontSize - 1 }}><b>{i.name}</b>{i.description && <span style={{ opacity: 0.7 }}> — {i.description}</span>}</div>)}</div>;
+  if (k === "interests") return <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>{items.map(i => <span key={i.id} style={{ padding: "2px 8px", borderRadius: 4, backgroundColor: `${c.primary}10`, color: c.primary, fontSize: bf.fontSize - 2 }}>{i.name}</span>)}</div>;
+  return <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>{items.map(i => <div key={i.id} style={{ fontSize: bf.fontSize - 1 }}><b>{i.name || i.network || ""}</b>{(i.issuer || i.username) && <div style={{ fontSize: bf.fontSize - 2, opacity: 0.7 }}>{i.issuer || i.username}</div>}{i.date && <div style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{i.date}</div>}</div>)}</div>;
+}
+
+function MainItems({ k, items, c, bf }: { k: string; items: any[]; c: { primary: string }; bf: { fontSize: number } }) {
+  if (k === "experience") return <>{items.map(i => <div key={i.id} style={{ marginBottom: 10 }}><div style={{ fontWeight: 700 }}>{i.position}</div><div style={{ color: c.primary, fontSize: bf.fontSize - 1 }}>{i.company}{i.location && ` — ${i.location}`}</div><div style={{ fontSize: bf.fontSize - 2, opacity: 0.5, marginTop: 2 }}>{i.date}</div>{i.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 4, whiteSpace: "pre-wrap" }}>{i.description}</p>}</div>)}</>;
+  if (k === "education") return <>{items.map(i => <div key={i.id} style={{ marginBottom: 8 }}><div style={{ fontWeight: 700 }}>{i.studyType}{i.area && ` in ${i.area}`}</div><div style={{ color: c.primary, fontSize: bf.fontSize - 1 }}>{i.institution}</div><div style={{ fontSize: bf.fontSize - 2, opacity: 0.5 }}>{i.date}{i.score && ` — GPA: ${i.score}`}</div>{i.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 2, whiteSpace: "pre-wrap" }}>{i.description}</p>}</div>)}</>;
+  return <>{items.map(i => <div key={i.id} style={{ marginBottom: 6 }}><div style={{ fontWeight: 600 }}>{i.name || i.title || i.organization || ""}</div>{(i.issuer || i.publisher || i.awarder || i.position) && <div style={{ fontSize: bf.fontSize - 1, opacity: 0.7 }}>{i.issuer || i.publisher || i.awarder || i.position}</div>}{i.date && <div style={{ fontSize: bf.fontSize - 2, opacity: 0.5 }}>{i.date}</div>}{(i.description || i.summary) && <p style={{ fontSize: bf.fontSize - 1, marginTop: 2, whiteSpace: "pre-wrap" }}>{i.description || i.summary}</p>}</div>)}</>;
 }

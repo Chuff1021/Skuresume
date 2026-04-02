@@ -1,398 +1,139 @@
 "use client";
 
-import type { ResumeData, ExperienceItem, EducationItem, SkillItem } from "@/types/resume";
+import type { ResumeData } from "@/types/resume";
 
-interface TemplateProps {
-  data: ResumeData;
-}
-
-export function OnyxTemplate({ data }: TemplateProps) {
+// Onyx: Clean single-column with horizontal header, picture left, info right
+// Matches rxresu.me Onyx - simplest template, no sidebar column
+export function OnyxTemplate({ data }: { data: ResumeData }) {
   const { basics, summary, sections, metadata } = data;
-  const { colors } = metadata.design;
-  const { body: bodyFont, heading: headingFont } = metadata.typography;
+  const c = metadata.design.colors;
+  const bf = metadata.typography.body;
+  const hf = metadata.typography.heading;
+  const m = metadata.page;
+
+  const visibleSections = (keys: string[]) =>
+    keys.filter((k) => {
+      const s = sections[k as keyof typeof sections];
+      return s && s.visible && s.items.length > 0;
+    });
+
+  const mainKeys = visibleSections(["experience", "education", "projects", "volunteer", "references", "publications", "awards", "certifications"]);
+  const sideKeys = visibleSections(["skills", "languages", "interests", "profiles"]);
 
   return (
-    <div
-      className="w-full h-full overflow-hidden"
-      style={{
-        fontFamily: bodyFont.fontFamily,
-        fontSize: bodyFont.fontSize,
-        lineHeight: bodyFont.lineHeight,
-        color: colors.text,
-        backgroundColor: colors.background,
-        padding: `${metadata.page.marginY}px ${metadata.page.marginX}px`,
-      }}
-    >
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h1
-          style={{
-            fontFamily: headingFont.fontFamily,
-            fontWeight: headingFont.fontWeight,
-            fontSize: headingFont.fontSize * 1.8,
-            lineHeight: headingFont.lineHeight,
-            color: colors.primary,
-          }}
-        >
-          {basics.name || "Your Name"}
-        </h1>
-        {basics.headline && (
-          <p
-            className="mt-1"
-            style={{ fontSize: bodyFont.fontSize + 2, color: colors.text }}
-          >
-            {basics.headline}
-          </p>
+    <div className="w-full h-full overflow-hidden" style={{ fontFamily: bf.fontFamily, fontSize: bf.fontSize, lineHeight: bf.lineHeight, color: c.text, backgroundColor: c.background, padding: `${m.marginY}px ${m.marginX}px` }}>
+      {/* Header: picture left, info right */}
+      <div style={{ display: "flex", alignItems: "center", gap: m.gapX, borderBottom: `2px solid ${c.primary}`, paddingBottom: m.marginY }}>
+        {data.picture.url && !data.picture.effects.hidden && (
+          <img src={data.picture.url} alt="" style={{ width: data.picture.size, height: data.picture.size, borderRadius: data.picture.borderRadius, objectFit: "cover" }} />
         )}
-        <div
-          className="flex items-center justify-center gap-3 mt-2 flex-wrap"
-          style={{ fontSize: bodyFont.fontSize - 2, opacity: 0.7 }}
-        >
-          {basics.email && <span>{basics.email}</span>}
-          {basics.email && basics.phone && <span>|</span>}
-          {basics.phone && <span>{basics.phone}</span>}
-          {(basics.email || basics.phone) && basics.location && <span>|</span>}
-          {basics.location && <span>{basics.location}</span>}
-          {basics.url.url && (
-            <>
-              <span>|</span>
-              <span>{basics.url.url}</span>
-            </>
-          )}
+        <div style={{ flex: 1 }}>
+          <h1 style={{ fontFamily: hf.fontFamily, fontWeight: hf.fontWeight, fontSize: hf.fontSize * 1.5, lineHeight: hf.lineHeight, margin: 0 }}>{basics.name || "Your Name"}</h1>
+          {basics.headline && <p style={{ fontSize: bf.fontSize + 1, opacity: 0.8, margin: "2px 0 0" }}>{basics.headline}</p>}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0 12px", marginTop: 6, fontSize: bf.fontSize - 2, opacity: 0.7 }}>
+            {basics.email && <span>{basics.email}</span>}
+            {basics.phone && <span>{basics.phone}</span>}
+            {basics.location && <span>{basics.location}</span>}
+            {basics.url.url && <span>{basics.url.url}</span>}
+          </div>
         </div>
       </div>
 
-      {/* Two-column layout */}
-      <div className="flex" style={{ gap: metadata.page.gapX }}>
-        {/* Main Column */}
-        <div className="flex-1" style={{ display: "flex", flexDirection: "column", gap: metadata.page.gapY }}>
-          {/* Summary */}
-          {summary && (
-            <div>
-              <SectionHeading
-                title="Summary"
-                color={colors.primary}
-                fontFamily={headingFont.fontFamily}
-                fontWeight={headingFont.fontWeight}
-                fontSize={headingFont.fontSize}
-              />
-              <p style={{ fontSize: bodyFont.fontSize - 1 }}>{summary}</p>
-            </div>
-          )}
-
-          {/* Experience */}
-          {sections.experience.visible && sections.experience.items.length > 0 && (
-            <div>
-              <SectionHeading
-                title={sections.experience.name}
-                color={colors.primary}
-                fontFamily={headingFont.fontFamily}
-                fontWeight={headingFont.fontWeight}
-                fontSize={headingFont.fontSize}
-              />
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {sections.experience.items
-                  .filter((i) => !i.hidden)
-                  .map((item) => (
-                    <ExperienceEntry key={item.id} item={item} colors={colors} bodyFont={bodyFont} />
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {/* Education */}
-          {sections.education.visible && sections.education.items.length > 0 && (
-            <div>
-              <SectionHeading
-                title={sections.education.name}
-                color={colors.primary}
-                fontFamily={headingFont.fontFamily}
-                fontWeight={headingFont.fontWeight}
-                fontSize={headingFont.fontSize}
-              />
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {sections.education.items
-                  .filter((i) => !i.hidden)
-                  .map((item) => (
-                    <EducationEntry key={item.id} item={item} colors={colors} bodyFont={bodyFont} />
-                  ))}
-              </div>
-            </div>
-          )}
+      {/* Summary */}
+      {summary && (
+        <div style={{ marginTop: m.gapY }}>
+          <SectionHead title="Summary" c={c} hf={hf} />
+          <p style={{ fontSize: bf.fontSize - 1, whiteSpace: "pre-wrap" }}>{summary}</p>
         </div>
+      )}
 
-        {/* Sidebar Column */}
-        <div
-          style={{
-            width: `${metadata.layout.sidebarWidth}%`,
-            display: "flex",
-            flexDirection: "column",
-            gap: metadata.page.gapY,
-          }}
-        >
-          {/* Skills */}
-          {sections.skills.visible && sections.skills.items.length > 0 && (
-            <div>
-              <SectionHeading
-                title={sections.skills.name}
-                color={colors.primary}
-                fontFamily={headingFont.fontFamily}
-                fontWeight={headingFont.fontWeight}
-                fontSize={headingFont.fontSize}
-              />
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {sections.skills.items
-                  .filter((i) => !i.hidden)
-                  .map((item) => (
-                    <SkillEntry key={item.id} item={item} colors={colors} bodyFont={bodyFont} />
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {/* Languages */}
-          {sections.languages.visible && sections.languages.items.length > 0 && (
-            <div>
-              <SectionHeading
-                title={sections.languages.name}
-                color={colors.primary}
-                fontFamily={headingFont.fontFamily}
-                fontWeight={headingFont.fontWeight}
-                fontSize={headingFont.fontSize}
-              />
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                {sections.languages.items
-                  .filter((i) => !i.hidden)
-                  .map((item) => (
-                    <div key={item.id} style={{ fontSize: bodyFont.fontSize - 1 }}>
-                      <span style={{ fontWeight: 600 }}>{item.name}</span>
-                      {item.description && (
-                        <span style={{ opacity: 0.7 }}> — {item.description}</span>
-                      )}
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {/* Interests */}
-          {sections.interests.visible && sections.interests.items.length > 0 && (
-            <div>
-              <SectionHeading
-                title={sections.interests.name}
-                color={colors.primary}
-                fontFamily={headingFont.fontFamily}
-                fontWeight={headingFont.fontWeight}
-                fontSize={headingFont.fontSize}
-              />
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, fontSize: bodyFont.fontSize - 1 }}>
-                {sections.interests.items
-                  .filter((i) => !i.hidden)
-                  .map((item) => (
-                    <span
-                      key={item.id}
-                      style={{
-                        padding: "2px 8px",
-                        borderRadius: 4,
-                        backgroundColor: `${colors.primary}15`,
-                        color: colors.primary,
-                        fontSize: bodyFont.fontSize - 2,
-                      }}
-                    >
-                      {item.name}
-                    </span>
-                  ))}
-              </div>
-            </div>
-          )}
+      {/* Main sections */}
+      {mainKeys.map((key) => (
+        <div key={key} style={{ marginTop: m.gapY }}>
+          <SectionHead title={sections[key as keyof typeof sections].name} c={c} hf={hf} />
+          <SectionItems sectionKey={key} sections={sections} c={c} bf={bf} />
         </div>
-      </div>
+      ))}
+
+      {/* Side sections */}
+      {sideKeys.map((key) => (
+        <div key={key} style={{ marginTop: m.gapY }}>
+          <SectionHead title={sections[key as keyof typeof sections].name} c={c} hf={hf} />
+          <SectionItems sectionKey={key} sections={sections} c={c} bf={bf} />
+        </div>
+      ))}
     </div>
   );
 }
 
-// === Sub-components ===
-
-function SectionHeading({
-  title,
-  color,
-  fontFamily,
-  fontWeight,
-  fontSize,
-}: {
-  title: string;
-  color: string;
-  fontFamily: string;
-  fontWeight: number;
-  fontSize: number;
-}) {
-  return (
-    <div
-      style={{
-        fontFamily,
-        fontWeight,
-        fontSize,
-        color,
-        borderBottom: `2px solid ${color}`,
-        paddingBottom: 4,
-        marginBottom: 8,
-        textTransform: "uppercase",
-        letterSpacing: 1,
-      }}
-    >
-      {title}
-    </div>
-  );
+function SectionHead({ title, c, hf }: { title: string; c: { primary: string }; hf: { fontFamily: string; fontWeight: number; fontSize: number } }) {
+  return <h6 style={{ fontFamily: hf.fontFamily, fontWeight: hf.fontWeight, fontSize: hf.fontSize * 0.75, color: c.primary, textTransform: "uppercase", letterSpacing: 1, margin: "0 0 6px", lineHeight: 1.3 }}>{title}</h6>;
 }
 
-function ExperienceEntry({
-  item,
-  colors,
-  bodyFont,
-}: {
-  item: ExperienceItem;
-  colors: { primary: string; text: string };
-  bodyFont: { fontSize: number };
-}) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <div>
-          <span style={{ fontWeight: 600, fontSize: bodyFont.fontSize }}>
-            {item.position}
-          </span>
-          {item.company && (
-            <span style={{ color: colors.primary }}>
-              {" "}at {item.company}
-            </span>
-          )}
+function SectionItems({ sectionKey, sections, c, bf }: { sectionKey: string; sections: ResumeData["sections"]; c: { primary: string; text: string }; bf: { fontSize: number } }) {
+  const section = sections[sectionKey as keyof typeof sections];
+  if (!section) return null;
+  const items = section.items.filter((i: { hidden: boolean }) => !i.hidden);
+
+  if (sectionKey === "experience") {
+    return <>{items.map((item: any) => (
+      <div key={item.id} style={{ marginBottom: 8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <div><span style={{ fontWeight: 700 }}>{item.company}</span>{item.location && <span style={{ opacity: 0.6 }}>, {item.location}</span>}</div>
+          <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6, whiteSpace: "nowrap" }}>{item.date}</span>
         </div>
-        <span
-          style={{
-            fontSize: bodyFont.fontSize - 2,
-            opacity: 0.6,
-            whiteSpace: "nowrap",
-            marginLeft: 8,
-          }}
-        >
-          {item.date}
-        </span>
+        <div style={{ color: c.primary, fontSize: bf.fontSize - 1 }}>{item.position}</div>
+        {item.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 3, whiteSpace: "pre-wrap", opacity: 0.9 }}>{item.description}</p>}
       </div>
-      {item.location && (
-        <div
-          style={{ fontSize: bodyFont.fontSize - 2, opacity: 0.6, marginTop: 1 }}
-        >
-          {item.location}
+    ))}</>;
+  }
+  if (sectionKey === "education") {
+    return <>{items.map((item: any) => (
+      <div key={item.id} style={{ marginBottom: 6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <span style={{ fontWeight: 700 }}>{item.institution}</span>
+          <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.date}</span>
         </div>
+        <div style={{ fontSize: bf.fontSize - 1, opacity: 0.8 }}>{item.studyType}{item.area && ` in ${item.area}`}{item.score && ` — ${item.score}`}</div>
+        {item.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 2, whiteSpace: "pre-wrap" }}>{item.description}</p>}
+      </div>
+    ))}</>;
+  }
+  if (sectionKey === "skills") {
+    return <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>{items.map((item: any) => (
+      <div key={item.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontWeight: 600, fontSize: bf.fontSize - 1 }}>{item.name}</span>
+        <LevelBar level={item.level} color={c.primary} />
+      </div>
+    ))}</div>;
+  }
+  if (sectionKey === "languages") {
+    return <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 16px" }}>{items.map((item: any) => (
+      <span key={item.id} style={{ fontSize: bf.fontSize - 1 }}><strong>{item.name}</strong>{item.description && <span style={{ opacity: 0.7 }}> — {item.description}</span>}</span>
+    ))}</div>;
+  }
+  if (sectionKey === "interests") {
+    return <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>{items.map((item: any) => (
+      <span key={item.id} style={{ padding: "1px 8px", borderRadius: 3, backgroundColor: `${c.primary}12`, color: c.primary, fontSize: bf.fontSize - 2 }}>{item.name}</span>
+    ))}</div>;
+  }
+  // Generic: projects, awards, certifications, publications, volunteer, references, profiles
+  return <>{items.map((item: any) => (
+    <div key={item.id} style={{ marginBottom: 6 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <span style={{ fontWeight: 600, fontSize: bf.fontSize }}>{item.name || item.title || item.organization || item.network || ""}</span>
+        <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.date || ""}</span>
+      </div>
+      {(item.issuer || item.publisher || item.awarder || item.position || item.username) && (
+        <div style={{ fontSize: bf.fontSize - 1, opacity: 0.7 }}>{item.issuer || item.publisher || item.awarder || item.position || item.username}</div>
       )}
-      {item.description && (
-        <p
-          style={{
-            fontSize: bodyFont.fontSize - 1,
-            marginTop: 4,
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {item.description}
-        </p>
-      )}
+      {(item.description || item.summary) && <p style={{ fontSize: bf.fontSize - 1, marginTop: 2, whiteSpace: "pre-wrap", opacity: 0.9 }}>{item.description || item.summary}</p>}
     </div>
-  );
+  ))}</>;
 }
 
-function EducationEntry({
-  item,
-  colors,
-  bodyFont,
-}: {
-  item: EducationItem;
-  colors: { primary: string; text: string };
-  bodyFont: { fontSize: number };
-}) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <div>
-          <span style={{ fontWeight: 600, fontSize: bodyFont.fontSize }}>
-            {item.studyType}
-            {item.area && ` in ${item.area}`}
-          </span>
-          {item.institution && (
-            <span style={{ color: colors.primary }}>
-              {" "}at {item.institution}
-            </span>
-          )}
-        </div>
-        <span
-          style={{
-            fontSize: bodyFont.fontSize - 2,
-            opacity: 0.6,
-            whiteSpace: "nowrap",
-            marginLeft: 8,
-          }}
-        >
-          {item.date}
-        </span>
-      </div>
-      {item.score && (
-        <div style={{ fontSize: bodyFont.fontSize - 2, opacity: 0.7, marginTop: 1 }}>
-          GPA: {item.score}
-        </div>
-      )}
-      {item.description && (
-        <p
-          style={{
-            fontSize: bodyFont.fontSize - 1,
-            marginTop: 4,
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {item.description}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function SkillEntry({
-  item,
-  colors,
-  bodyFont,
-}: {
-  item: SkillItem;
-  colors: { primary: string };
-  bodyFont: { fontSize: number };
-}) {
-  return (
-    <div>
-      <div className="flex items-center justify-between" style={{ fontSize: bodyFont.fontSize - 1 }}>
-        <span style={{ fontWeight: 600 }}>{item.name}</span>
-        {/* Level bar */}
-        <div className="flex gap-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: 16,
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: i < item.level ? colors.primary : `${colors.primary}20`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      {item.keywords.length > 0 && (
-        <div
-          style={{
-            fontSize: bodyFont.fontSize - 2,
-            opacity: 0.7,
-            marginTop: 2,
-          }}
-        >
-          {item.keywords.join(" · ")}
-        </div>
-      )}
-    </div>
-  );
+function LevelBar({ level, color }: { level: number; color: string }) {
+  return <div style={{ display: "flex", gap: 2 }}>{Array.from({ length: 5 }).map((_, i) => (
+    <div key={i} style={{ width: 14, height: 4, borderRadius: 2, backgroundColor: i < level ? color : `${color}20` }} />
+  ))}</div>;
 }
