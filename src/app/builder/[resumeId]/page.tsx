@@ -12,6 +12,7 @@ import { BuilderHeader } from "@/components/builder/header";
 import { LeftSidebar } from "@/components/builder/left-sidebar";
 import { RightSidebar } from "@/components/builder/right-sidebar";
 import { ResumePreview } from "@/components/resume/preview";
+import { TailorDialog } from "@/components/builder/tailor-dialog";
 import type { ResumeData } from "@/types/resume";
 
 interface ResumeResponse {
@@ -26,6 +27,7 @@ export default function BuilderPage() {
   const { resumeId } = useParams<{ resumeId: string }>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [tailorOpen, setTailorOpen] = useState(false);
 
   const initialize = useResumeStore((s) => s.initialize);
   const isReady = useResumeStore((s) => s.isReady);
@@ -84,7 +86,7 @@ export default function BuilderPage() {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <BuilderHeader />
+      <BuilderHeader onOpenTailor={() => setTailorOpen(true)} />
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
         {leftSidebarOpen && (
@@ -105,6 +107,9 @@ export default function BuilderPage() {
           </div>
         )}
       </div>
+
+      {/* AI Tailor Dialog */}
+      {tailorOpen && <TailorDialog onClose={() => setTailorOpen(false)} />}
     </div>
   );
 }

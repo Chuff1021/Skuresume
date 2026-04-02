@@ -9,12 +9,12 @@ import {
   Check,
   CircleNotch,
   SidebarSimple,
-  CaretDown,
+  Sparkle,
 } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
 import { useBuilderStore } from "@/stores/builder";
 
-export function BuilderHeader() {
+export function BuilderHeader({ onOpenTailor }: { onOpenTailor?: () => void }) {
   const { name, setName, isDirty, isSaving, lastSavedAt } = useResumeStore();
   const { undo, redo } = useResumeStore.temporal.getState();
   const { toggleLeftSidebar, toggleRightSidebar } = useBuilderStore();
@@ -84,6 +84,17 @@ export function BuilderHeader() {
       >
         <ArrowUUpRight size={18} />
       </button>
+
+      {/* AI Tailor */}
+      {onOpenTailor && (
+        <button
+          onClick={onOpenTailor}
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
+        >
+          <Sparkle size={14} weight="fill" />
+          Tailor to Job
+        </button>
+      )}
 
       <div className="w-px h-5 bg-border mx-1" />
 

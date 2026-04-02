@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { useResumeStore } from "@/stores/resume";
-import { OnyxTemplate } from "./templates/onyx";
+import { getTemplate } from "./templates";
 
 // A4 dimensions at 96 DPI
 const A4_WIDTH = 794;
@@ -36,11 +36,13 @@ export function ResumePreview() {
 
   if (!data) {
     return (
-      <div className="flex-1 flex items-center justify-center text-muted text-sm">
+      <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
         Loading preview...
       </div>
     );
   }
+
+  const TemplateComponent = getTemplate(data.metadata.template);
 
   return (
     <div
@@ -56,7 +58,7 @@ export function ResumePreview() {
         }}
         className="bg-white shadow-xl rounded-sm shrink-0"
       >
-        <OnyxTemplate data={data} />
+        <TemplateComponent data={data} />
       </div>
     </div>
   );
