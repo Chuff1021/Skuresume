@@ -186,7 +186,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.82 }}
         >
-          SKU AI Resume Builder simplifies the process of creating, updating,
+          SKU Resume AI Builder simplifies the process of creating, updating,
           and sharing your resume. With AI assistance, build a standout resume
           in minutes.
         </motion.p>

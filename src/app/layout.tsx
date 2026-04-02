@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SKU AI Resume Builder",
+  title: "SKU Resume AI Builder",
   description:
     "A free, AI-powered resume builder. Create stunning resumes with live preview, multiple templates, and intelligent content suggestions.",
 };

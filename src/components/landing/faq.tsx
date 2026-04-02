@@ -7,7 +7,7 @@ import { CaretDown } from "@phosphor-icons/react";
 const faqs = [
   {
     q: "Is this really free?",
-    a: "Yes, SKU AI Resume Builder is completely free to use. There are no hidden costs, premium tiers, or ads. You can create unlimited resumes without ever paying anything.",
+    a: "Yes, SKU Resume AI Builder is completely free to use. There are no hidden costs, premium tiers, or ads. You can create unlimited resumes without ever paying anything.",
   },
   {
     q: "How is my data protected?",

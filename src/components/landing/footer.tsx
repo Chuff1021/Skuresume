@@ -28,10 +28,10 @@ export function Footer() {
         {/* Brand */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm">
-              S
+            <div className="flex h-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-xs px-2 tracking-wider">
+              SKU
             </div>
-            <span className="font-semibold">SKU AI Resume Builder</span>
+            <span className="font-semibold">SKU Resume AI Builder</span>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
             A free, AI-powered resume builder that helps you create professional
@@ -70,7 +70,7 @@ export function Footer() {
         <div className="space-y-3">
           <h4 className="text-sm font-semibold">Legal</h4>
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} SKU AI Resume Builder
+            &copy; {new Date().getFullYear()} SKU Resume AI Builder
           </p>
           <p className="text-xs text-muted-foreground">
             MIT License

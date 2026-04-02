@@ -13,6 +13,8 @@ import {
   ArrowSquareOut,
   PencilSimple,
   House,
+  UploadSimple,
+  X,
 } from "@phosphor-icons/react";
 
 interface Resume {
@@ -30,6 +32,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const fetchResumes = useCallback(async () => {
     try {
@@ -96,6 +100,29 @@ export default function DashboardPage() {
     setMenuOpen(null);
   };
 
+  const handleImportJSON = async (file: File) => {
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      const res = await fetch("/api/resumes/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data, name: data?.basics?.name || file.name.replace(/\.json$/, "") }),
+      });
+      if (res.ok) {
+        const resume = await res.json();
+        router.push(`/builder/${resume.id}`);
+      }
+    } catch (error) {
+      console.error("Failed to import:", error);
+      alert("Failed to import resume. Make sure it's a valid JSON file.");
+    } finally {
+      setImporting(false);
+      setImportOpen(false);
+    }
+  };
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
@@ -118,20 +145,29 @@ export default function DashboardPage() {
             </Link>
             <div className="h-5 w-px bg-border" />
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm">
-                S
+              <div className="flex h-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-xs px-2 tracking-wider">
+                SKU
               </div>
-              <span className="font-semibold text-sm hidden sm:inline">SKU AI Resume Builder</span>
+              <span className="font-semibold text-sm hidden sm:inline">SKU Resume AI Builder</span>
             </Link>
           </div>
-          <button
-            onClick={createResume}
-            disabled={creating}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-          >
-            <Plus size={16} />
-            {creating ? "Creating..." : "New Resume"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setImportOpen(true)}
+              className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+            >
+              <UploadSimple size={16} />
+              Import
+            </button>
+            <button
+              onClick={createResume}
+              disabled={creating}
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            >
+              <Plus size={16} />
+              {creating ? "Creating..." : "New Resume"}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -290,6 +326,67 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      {/* Import Modal */}
+      <AnimatePresence>
+        {importOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="w-full max-w-md rounded-lg border border-border bg-popover shadow-2xl"
+              initial={{ scale: 0.95, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 10 }}
+            >
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <h2 className="text-base font-semibold">Import Resume</h2>
+                <button
+                  onClick={() => setImportOpen(false)}
+                  className="size-8 rounded-md hover:bg-secondary flex items-center justify-center"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="p-4 space-y-4">
+                {/* JSON Upload */}
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Upload JSON</h3>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Import a resume from a JSON file exported from SKU Resume AI Builder or Reactive Resume.
+                  </p>
+                  <label className="flex flex-col items-center justify-center h-32 rounded-md border-2 border-dashed border-border hover:border-primary/30 cursor-pointer transition-colors group">
+                    <UploadSimple size={24} className="text-muted-foreground group-hover:text-primary transition-colors mb-2" />
+                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                      {importing ? "Importing..." : "Click to upload .json file"}
+                    </span>
+                    <input
+                      type="file"
+                      accept=".json"
+                      className="hidden"
+                      disabled={importing}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImportJSON(file);
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {/* Drag & drop hint */}
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">
+                    Supports JSON format from SKU Resume AI Builder and Reactive Resume
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

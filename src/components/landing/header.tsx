@@ -35,8 +35,8 @@ export function Header() {
       <div className="container mx-auto flex items-center justify-between p-3 lg:px-12">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex size-10 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-lg">
-            S
+          <div className="flex h-10 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm px-3 tracking-wider">
+            SKU
           </div>
         </Link>
 
