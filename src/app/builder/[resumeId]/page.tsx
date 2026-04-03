@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-// react-resizable-panels deferred to Phase 3 — using fixed-width sidebars for now
-import { ArrowLeft, FileText } from "@phosphor-icons/react";
+import { ArrowLeft, FileText, Sliders, Layout, X } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
 import { useBuilderStore } from "@/stores/builder";
 import { useAutosave } from "@/hooks/use-autosave";
@@ -29,6 +28,8 @@ export default function BuilderPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [tailorOpen, setTailorOpen] = useState(false);
+  // Mobile: which sidebar sheet is open
+  const [mobileSheet, setMobileSheet] = useState<"left" | "right" | null>(null);
 
   const initialize = useResumeStore((s) => s.initialize);
   const isReady = useResumeStore((s) => s.isReady);
@@ -88,10 +89,11 @@ export default function BuilderPage() {
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       <BuilderHeader onOpenTailor={() => setTailorOpen(true)} />
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar */}
+
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Left Sidebar — desktop */}
         {leftSidebarOpen && (
-          <div className="w-80 border-r border-border shrink-0 overflow-hidden">
+          <div className="hidden md:block w-80 border-r border-border shrink-0 overflow-hidden">
             <LeftSidebar />
           </div>
         )}
@@ -101,12 +103,71 @@ export default function BuilderPage() {
           <ResumePreview />
         </div>
 
-        {/* Right Sidebar */}
+        {/* Right Sidebar — desktop */}
         {rightSidebarOpen && (
-          <div className="w-72 border-l border-border shrink-0 overflow-hidden">
+          <div className="hidden md:block w-72 border-l border-border shrink-0 overflow-hidden">
             <RightSidebar />
           </div>
         )}
+
+        {/* Mobile sidebar sheets */}
+        {mobileSheet && (
+          <>
+            <div
+              className="md:hidden fixed inset-0 z-30 bg-black/40"
+              onClick={() => setMobileSheet(null)}
+            />
+            <div
+              className={`md:hidden fixed inset-y-0 z-40 w-80 bg-background border-border overflow-hidden flex flex-col ${
+                mobileSheet === "left" ? "left-0 border-r" : "right-0 border-l"
+              }`}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <span className="text-sm font-medium">
+                  {mobileSheet === "left" ? "Edit" : "Design"}
+                </span>
+                <button
+                  onClick={() => setMobileSheet(null)}
+                  className="size-8 rounded-md hover:bg-secondary flex items-center justify-center"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                {mobileSheet === "left" ? <LeftSidebar /> : <RightSidebar />}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Mobile Bottom Dock */}
+      <div className="md:hidden flex items-center justify-around border-t border-border bg-popover py-2 px-4 shrink-0">
+        <button
+          onClick={() => setMobileSheet(mobileSheet === "left" ? null : "left")}
+          className={`flex flex-col items-center gap-1 px-4 py-1 rounded-md transition-colors ${
+            mobileSheet === "left" ? "text-primary" : "text-muted-foreground"
+          }`}
+        >
+          <Layout size={20} />
+          <span className="text-[10px]">Edit</span>
+        </button>
+        <button
+          onClick={() => setTailorOpen(true)}
+          className="flex flex-col items-center gap-1 px-4 py-1 rounded-md text-muted-foreground"
+        >
+          <FileText size={20} />
+          <span className="text-[10px]">AI Tailor</span>
+        </button>
+        <button
+          onClick={() => setMobileSheet(mobileSheet === "right" ? null : "right")}
+          className={`flex flex-col items-center gap-1 px-4 py-1 rounded-md transition-colors ${
+            mobileSheet === "right" ? "text-primary" : "text-muted-foreground"
+          }`}
+        >
+          <Sliders size={20} />
+          <span className="text-[10px]">Design</span>
+        </button>
       </div>
 
       {/* AI Tailor Dialog */}
