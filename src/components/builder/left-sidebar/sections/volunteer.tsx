@@ -2,7 +2,7 @@
 
 import { HandHeart, Plus, Trash, DotsSixVertical as GripVertical } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
-import { SectionBase, Field, Input, TextArea } from "../section-base";
+import { SectionBase, Field, Input, TextAreaWithAI } from "../section-base";
 import type { VolunteerItem } from "@/types/resume";
 
 function createVolunteerItem(): VolunteerItem {
@@ -105,7 +105,8 @@ export function VolunteerSection() {
               </Field>
             </div>
             <Field label="Description">
-              <TextArea
+              <TextAreaWithAI
+                aiMode="improve"
                 value={item.description}
                 onChange={(v) => updateItem(item.id, "description", v)}
                 placeholder="Describe your volunteer work..."

@@ -2,7 +2,7 @@
 
 import { Briefcase, Plus, Trash, DotsSixVertical as GripVertical } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
-import { SectionBase, Field, Input, TextArea } from "../section-base";
+import { SectionBase, Field, Input, TextAreaWithAI } from "../section-base";
 import type { ExperienceItem } from "@/types/resume";
 
 function createExperienceItem(): ExperienceItem {
@@ -105,11 +105,12 @@ export function ExperienceSection() {
               </Field>
             </div>
             <Field label="Description">
-              <TextArea
+              <TextAreaWithAI
                 value={item.description}
                 onChange={(v) => updateItem(item.id, "description", v)}
                 placeholder="Describe your responsibilities and achievements..."
                 rows={3}
+                aiMode="improve"
               />
             </Field>
           </div>

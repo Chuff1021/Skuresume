@@ -2,7 +2,7 @@
 
 import { GraduationCap, Plus, Trash, DotsSixVertical as GripVertical } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
-import { SectionBase, Field, Input, TextArea } from "../section-base";
+import { SectionBase, Field, Input, TextAreaWithAI } from "../section-base";
 import type { EducationItem } from "@/types/resume";
 
 function createEducationItem(): EducationItem {
@@ -113,7 +113,8 @@ export function EducationSection() {
               </Field>
             </div>
             <Field label="Description">
-              <TextArea
+              <TextAreaWithAI
+                aiMode="improve"
                 value={item.description}
                 onChange={(v) => updateItem(item.id, "description", v)}
                 placeholder="Notable achievements, courses, activities..."

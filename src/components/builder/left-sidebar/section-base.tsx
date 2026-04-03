@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { CaretDown, CaretRight } from "@phosphor-icons/react";
+import { AIPopover } from "../ai-popover";
 
 interface SectionBaseProps {
   title: string;
@@ -101,5 +102,33 @@ export function TextArea({
       rows={rows}
       className="w-full px-3 py-2 text-sm bg-card border border-border rounded-md outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
     />
+  );
+}
+
+// Textarea with AI improve button
+interface TextAreaWithAIProps extends TextAreaProps {
+  aiMode?: "rewrite" | "improve";
+}
+
+export function TextAreaWithAI({
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+  aiMode = "improve",
+}: TextAreaWithAIProps) {
+  return (
+    <div>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        className="w-full px-3 py-2 text-sm bg-card border border-border rounded-md outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
+      />
+      <div className="flex justify-end mt-1">
+        <AIPopover currentText={value} onApply={onChange} mode={aiMode} />
+      </div>
+    </div>
   );
 }
