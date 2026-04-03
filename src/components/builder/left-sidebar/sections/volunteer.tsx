@@ -51,8 +51,14 @@ export function VolunteerSection() {
 
   return (
     <SectionBase
-      title="Volunteer"
+      title={data.sections.volunteer.name}
       icon={<HandHeart size={16} />}
+      visible={data.sections.volunteer.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.volunteer.visible = !d.sections.volunteer.visible;
+        })
+      }
     >
       <div className="space-y-3">
         {items.map((item) => (

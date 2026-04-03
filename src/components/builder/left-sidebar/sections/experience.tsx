@@ -51,8 +51,14 @@ export function ExperienceSection() {
 
   return (
     <SectionBase
-      title="Experience"
+      title={data.sections.experience.name}
       icon={<Briefcase size={16} />}
+      visible={data.sections.experience.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.experience.visible = !d.sections.experience.visible;
+        })
+      }
     >
       <div className="space-y-4">
         {items.map((item) => (

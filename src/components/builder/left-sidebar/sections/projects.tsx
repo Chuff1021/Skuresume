@@ -50,8 +50,14 @@ export function ProjectsSection() {
 
   return (
     <SectionBase
-      title="Projects"
+      title={data.sections.projects.name}
       icon={<Folder size={16} />}
+      visible={data.sections.projects.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.projects.visible = !d.sections.projects.visible;
+        })
+      }
     >
       <div className="space-y-3">
         {items.map((item) => (

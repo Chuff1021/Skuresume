@@ -48,7 +48,16 @@ export function SkillsSection() {
   };
 
   return (
-    <SectionBase title="Skills" icon={<Wrench size={16} />}>
+    <SectionBase
+      title={data.sections.skills.name}
+      icon={<Wrench size={16} />}
+      visible={data.sections.skills.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.skills.visible = !d.sections.skills.visible;
+        })
+      }
+    >
       <div className="space-y-3">
         {items.map((item) => (
           <div

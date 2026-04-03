@@ -48,8 +48,14 @@ export function LanguagesSection() {
 
   return (
     <SectionBase
-      title="Languages"
+      title={data.sections.languages.name}
       icon={<Translate size={16} />}
+      visible={data.sections.languages.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.languages.visible = !d.sections.languages.visible;
+        })
+      }
     >
       <div className="space-y-3">
         {items.map((item) => (

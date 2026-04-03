@@ -49,8 +49,14 @@ export function ReferencesSection() {
 
   return (
     <SectionBase
-      title="References"
+      title={data.sections.references.name}
       icon={<UserCircle size={16} />}
+      visible={data.sections.references.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.references.visible = !d.sections.references.visible;
+        })
+      }
     >
       <div className="space-y-3">
         {items.map((item) => (

@@ -52,8 +52,14 @@ export function EducationSection() {
 
   return (
     <SectionBase
-      title="Education"
+      title={data.sections.education.name}
       icon={<GraduationCap size={16} />}
+      visible={data.sections.education.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.education.visible = !d.sections.education.visible;
+        })
+      }
     >
       <div className="space-y-4">
         {items.map((item) => (

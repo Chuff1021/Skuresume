@@ -50,8 +50,14 @@ export function AwardsSection() {
 
   return (
     <SectionBase
-      title="Awards"
+      title={data.sections.awards.name}
       icon={<Trophy size={16} />}
+      visible={data.sections.awards.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.awards.visible = !d.sections.awards.visible;
+        })
+      }
     >
       <div className="space-y-3">
         {items.map((item) => (

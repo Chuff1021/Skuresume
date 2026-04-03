@@ -50,8 +50,14 @@ export function CertificationsSection() {
 
   return (
     <SectionBase
-      title="Certifications"
+      title={data.sections.certifications.name}
       icon={<Certificate size={16} />}
+      visible={data.sections.certifications.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.certifications.visible = !d.sections.certifications.visible;
+        })
+      }
     >
       <div className="space-y-3">
         {items.map((item) => (

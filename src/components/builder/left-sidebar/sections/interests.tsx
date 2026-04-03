@@ -47,8 +47,14 @@ export function InterestsSection() {
 
   return (
     <SectionBase
-      title="Interests"
+      title={data.sections.interests.name}
       icon={<Heart size={16} />}
+      visible={data.sections.interests.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.interests.visible = !d.sections.interests.visible;
+        })
+      }
     >
       <div className="space-y-3">
         {items.map((item) => (

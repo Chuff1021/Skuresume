@@ -49,8 +49,14 @@ export function ProfilesSection() {
 
   return (
     <SectionBase
-      title="Profiles"
+      title={data.sections.profiles.name}
       icon={<Globe size={16} />}
+      visible={data.sections.profiles.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.profiles.visible = !d.sections.profiles.visible;
+        })
+      }
     >
       <div className="space-y-3">
         {items.map((item) => (

@@ -50,8 +50,14 @@ export function PublicationsSection() {
 
   return (
     <SectionBase
-      title="Publications"
+      title={data.sections.publications.name}
       icon={<BookOpen size={16} />}
+      visible={data.sections.publications.visible}
+      onToggleVisible={() =>
+        updateData((d) => {
+          d.sections.publications.visible = !d.sections.publications.visible;
+        })
+      }
     >
       <div className="space-y-3">
         {items.map((item) => (
