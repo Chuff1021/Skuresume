@@ -16,14 +16,39 @@ import {
   UploadSimple,
   X,
 } from "@phosphor-icons/react";
+import { getTemplate } from "@/components/resume/templates";
+import type { ResumeData } from "@/types/resume";
 
 interface Resume {
   id: string;
   name: string;
   slug: string;
   isPublic: boolean;
+  data: ResumeData;
   updatedAt: string;
   createdAt: string;
+}
+
+// Scaled resume thumbnail for dashboard cards
+const CARD_WIDTH = 280; // approximate card width
+const PAGE_WIDTH = 794; // A4 width
+const THUMB_SCALE = CARD_WIDTH / PAGE_WIDTH;
+
+function ResumeThumbnail({ data }: { data: ResumeData }) {
+  const TemplateComponent = getTemplate(data.metadata.template);
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div
+        style={{
+          transform: `scale(${THUMB_SCALE})`,
+          transformOrigin: "top left",
+          width: PAGE_WIDTH,
+        }}
+      >
+        <TemplateComponent data={data} />
+      </div>
+    </div>
+  );
 }
 
 export default function DashboardPage() {
@@ -242,13 +267,11 @@ export default function DashboardPage() {
                   href={`/builder/${resume.id}`}
                   className="block absolute inset-0"
                 >
-                  <div className="absolute inset-0 flex items-center justify-center bg-card">
-                    <div className="w-3/5 aspect-page bg-white rounded shadow-sm border flex items-center justify-center">
-                      <FileText size={32} className="text-muted-foreground/20" />
-                    </div>
+                  <div className="absolute inset-0 bg-white overflow-hidden">
+                    <ResumeThumbnail data={resume.data} />
                   </div>
                   {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-primary/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <span className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium flex items-center gap-1.5">
                       <PencilSimple size={12} />
                       Edit
