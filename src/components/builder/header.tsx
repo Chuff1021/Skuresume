@@ -13,6 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
 import { useBuilderStore } from "@/stores/builder";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function BuilderHeader({ onOpenTailor }: { onOpenTailor?: () => void }) {
   const { name, setName, isDirty, isSaving, lastSavedAt } = useResumeStore();
@@ -84,6 +85,8 @@ export function BuilderHeader({ onOpenTailor }: { onOpenTailor?: () => void }) {
       >
         <ArrowUUpRight size={18} />
       </button>
+
+      <ThemeToggle />
 
       {/* AI Tailor */}
       {onOpenTailor && (

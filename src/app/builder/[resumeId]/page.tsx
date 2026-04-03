@@ -19,6 +19,7 @@ interface ResumeResponse {
   id: string;
   name: string;
   slug: string;
+  isPublic: boolean;
   data: ResumeData;
   updatedAt: string;
 }
@@ -42,7 +43,7 @@ export default function BuilderPage() {
         const res = await fetch(`/api/resumes/${resumeId}`);
         if (res.ok) {
           const data: ResumeResponse = await res.json();
-          initialize(data.id, data.name, data.data);
+          initialize(data.id, data.name, data.slug, data.isPublic ?? false, data.data);
         } else {
           setError(true);
         }

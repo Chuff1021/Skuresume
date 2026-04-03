@@ -9,9 +9,13 @@ import {
   TextAa,
   FileArrowDown,
   Ruler,
-  Code,
   CaretDown,
   CaretRight,
+  ShareNetwork,
+  Copy,
+  Check,
+  Code,
+  Note,
 } from "@phosphor-icons/react";
 
 export function RightSidebar() {
@@ -22,6 +26,9 @@ export function RightSidebar() {
         <ColorsSection />
         <TypographySection />
         <PageSection />
+        <ShareSection />
+        <CustomCssSection />
+        <NotesSection />
         <ExportSection />
       </div>
     </div>
@@ -245,6 +252,91 @@ function PageSection() {
   );
 }
 
+// === Share ===
+function ShareSection() {
+  const id = useResumeStore((s) => s.id);
+  const slug = useResumeStore((s) => s.slug);
+  const isPublic = useResumeStore((s) => s.isPublic);
+  const setIsPublic = useResumeStore((s) => s.setIsPublic);
+  const data = useResumeStore((s) => s.data);
+  const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
+  if (!data || !id) return null;
+
+  const shareUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/r/${slug}`
+    : `/r/${slug}`;
+
+  const togglePublic = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/resumes/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPublic: !isPublic }),
+      });
+      if (res.ok) setIsPublic(!isPublic);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
+  return (
+    <SidebarSection icon={<ShareNetwork size={16} />} title="Share">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-xs font-medium">Public link</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Anyone with the link can view this resume
+            </div>
+          </div>
+          <button
+            onClick={togglePublic}
+            disabled={saving}
+            className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+              isPublic ? "bg-primary" : "bg-muted"
+            } disabled:opacity-50`}
+          >
+            <span
+              className={`inline-block size-3.5 rounded-full bg-white shadow transition-transform ${
+                isPublic ? "translate-x-[18px]" : "translate-x-[2px]"
+              }`}
+            />
+          </button>
+        </div>
+
+        {isPublic && slug && (
+          <div className="flex items-center gap-1">
+            <input
+              readOnly
+              value={shareUrl}
+              className="flex-1 px-2 py-1 text-xs bg-card border border-border rounded-md outline-none text-muted-foreground truncate"
+            />
+            <button
+              onClick={copyUrl}
+              className="size-7 flex items-center justify-center rounded-md border border-border bg-card hover:bg-secondary transition-colors shrink-0"
+              title="Copy link"
+            >
+              {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
+            </button>
+          </div>
+        )}
+      </div>
+    </SidebarSection>
+  );
+}
+
 // === Export ===
 function ExportSection() {
   const { id, data } = useResumeStore();
@@ -281,6 +373,64 @@ function ExportSection() {
           Export as JSON
         </button>
       </div>
+    </SidebarSection>
+  );
+}
+
+// === Custom CSS ===
+function CustomCssSection() {
+  const data = useResumeStore((s) => s.data);
+  const updateData = useResumeStore((s) => s.updateData);
+  if (!data) return null;
+  const { enabled, value } = data.metadata.css;
+
+  return (
+    <SidebarSection icon={<Code size={16} />} title="Custom CSS">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-xs text-muted-foreground">Enable custom CSS</label>
+          <button
+            onClick={() => updateData((d) => { d.metadata.css.enabled = !d.metadata.css.enabled; })}
+            className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+              enabled ? "bg-primary" : "bg-muted"
+            }`}
+          >
+            <span
+              className={`inline-block size-3.5 rounded-full bg-white shadow transition-transform ${
+                enabled ? "translate-x-[18px]" : "translate-x-[2px]"
+              }`}
+            />
+          </button>
+        </div>
+        <textarea
+          value={value}
+          onChange={(e) => updateData((d) => { d.metadata.css.value = e.target.value; })}
+          placeholder=".resume { font-size: 12px; }"
+          rows={6}
+          className="w-full px-2 py-1.5 text-xs font-mono bg-card border border-border rounded-md outline-none resize-y text-foreground placeholder:text-muted-foreground"
+          disabled={!enabled}
+        />
+      </div>
+    </SidebarSection>
+  );
+}
+
+// === Notes ===
+function NotesSection() {
+  const data = useResumeStore((s) => s.data);
+  const updateData = useResumeStore((s) => s.updateData);
+  if (!data) return null;
+
+  return (
+    <SidebarSection icon={<Note size={16} />} title="Notes">
+      <textarea
+        value={data.metadata.notes}
+        onChange={(e) => updateData((d) => { d.metadata.notes = e.target.value; })}
+        placeholder="Private notes about this resume..."
+        rows={4}
+        className="w-full px-2 py-1.5 text-xs bg-card border border-border rounded-md outline-none resize-y text-foreground placeholder:text-muted-foreground"
+      />
+      <p className="text-xs text-muted-foreground mt-1">Notes are private and never shown on the resume.</p>
     </SidebarSection>
   );
 }

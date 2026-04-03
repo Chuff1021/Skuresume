@@ -7,6 +7,8 @@ export interface ResumeState {
   // Data
   id: string | null;
   name: string;
+  slug: string;
+  isPublic: boolean;
   data: ResumeData | null;
 
   // Status
@@ -16,8 +18,9 @@ export interface ResumeState {
   lastSavedAt: Date | null;
 
   // Actions
-  initialize: (id: string, name: string, data: ResumeData) => void;
+  initialize: (id: string, name: string, slug: string, isPublic: boolean, data: ResumeData) => void;
   setName: (name: string) => void;
+  setIsPublic: (isPublic: boolean) => void;
   updateData: (updater: (data: ResumeData) => void) => void;
   markSaving: () => void;
   markSaved: () => void;
@@ -29,16 +32,20 @@ export const useResumeStore = create<ResumeState>()(
     immer((set) => ({
       id: null,
       name: "",
+      slug: "",
+      isPublic: false,
       data: null,
       isReady: false,
       isDirty: false,
       isSaving: false,
       lastSavedAt: null,
 
-      initialize: (id, name, data) => {
+      initialize: (id, name, slug, isPublic, data) => {
         set((state) => {
           state.id = id;
           state.name = name;
+          state.slug = slug;
+          state.isPublic = isPublic;
           state.data = data;
           state.isReady = true;
           state.isDirty = false;
@@ -49,6 +56,12 @@ export const useResumeStore = create<ResumeState>()(
         set((state) => {
           state.name = name;
           state.isDirty = true;
+        });
+      },
+
+      setIsPublic: (isPublic) => {
+        set((state) => {
+          state.isPublic = isPublic;
         });
       },
 

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { motion, useMotionValue, useSpring } from "motion/react";
 import { ArrowRight } from "@phosphor-icons/react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Header() {
   const y = useMotionValue(0);
@@ -42,6 +43,7 @@ export function Header() {
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Link
             href="/dashboard"
             className="hidden sm:inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
