@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { CaretDown, CaretRight, Eye, EyeSlash } from "@phosphor-icons/react";
+import { CaretDown, CaretRight, Eye, EyeSlash, Trash, DotsSixVertical as GripVertical } from "@phosphor-icons/react";
 import { AIPopover } from "../ai-popover";
 
 interface SectionBaseProps {
@@ -117,6 +117,47 @@ export function TextArea({
       rows={rows}
       className="w-full px-3 py-2 text-sm bg-card border border-border rounded-md outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
     />
+  );
+}
+
+// Reusable item card header (grip + label + hide + delete)
+interface ItemCardProps {
+  label: string;
+  hidden?: boolean;
+  onToggleHidden?: () => void;
+  onDelete: () => void;
+  children: ReactNode;
+}
+
+export function ItemCard({ label, hidden, onToggleHidden, onDelete, children }: ItemCardProps) {
+  return (
+    <div className={`p-3 rounded-lg bg-card border border-border space-y-3 ${hidden ? "opacity-50" : ""}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 min-w-0">
+          <GripVertical size={16} className="text-muted-foreground cursor-grab shrink-0" />
+          <span className="text-xs font-medium text-muted truncate">{label}</span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          {onToggleHidden && (
+            <button
+              onClick={onToggleHidden}
+              className="w-6 h-6 rounded hover:bg-secondary flex items-center justify-center transition-colors"
+              title={hidden ? "Show item" : "Hide item"}
+            >
+              {hidden ? <EyeSlash size={13} className="text-muted-foreground" /> : <Eye size={13} className="text-muted-foreground" />}
+            </button>
+          )}
+          <button
+            onClick={onDelete}
+            className="w-6 h-6 rounded hover:bg-destructive/10 flex items-center justify-center transition-colors"
+            title="Delete"
+          >
+            <Trash size={14} className="text-destructive" />
+          </button>
+        </div>
+      </div>
+      {children}
+    </div>
   );
 }
 

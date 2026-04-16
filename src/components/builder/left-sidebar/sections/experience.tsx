@@ -1,8 +1,8 @@
 "use client";
 
-import { Briefcase, Plus, Trash, DotsSixVertical as GripVertical } from "@phosphor-icons/react";
+import { Briefcase, Plus } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
-import { SectionBase, Field, Input, TextAreaWithAI } from "../section-base";
+import { SectionBase, ItemCard, Field, Input, TextAreaWithAI } from "../section-base";
 import type { ExperienceItem } from "@/types/resume";
 
 function createExperienceItem(): ExperienceItem {
@@ -62,24 +62,13 @@ export function ExperienceSection() {
     >
       <div className="space-y-4">
         {items.map((item) => (
-          <div
+          <ItemCard
             key={item.id}
-            className="p-3 rounded-lg bg-card border border-border space-y-3"
+            label={item.position || item.company || "New Position"}
+            hidden={item.hidden}
+            onToggleHidden={() => updateData((d) => { const i = d.sections.experience.items.find((x) => x.id === item.id); if (i) i.hidden = !i.hidden; })}
+            onDelete={() => removeItem(item.id)}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <GripVertical size={16} className="text-muted-foreground cursor-grab" />
-                <span className="text-xs font-medium text-muted">
-                  {item.position || item.company || "New Position"}
-                </span>
-              </div>
-              <button
-                onClick={() => removeItem(item.id)}
-                className="w-6 h-6 rounded hover:bg-destructive/10 flex items-center justify-center transition-colors"
-              >
-                <Trash size={14} className="text-destructive" />
-              </button>
-            </div>
             <div className="grid grid-cols-2 gap-2">
               <Field label="Company">
                 <Input
@@ -119,7 +108,7 @@ export function ExperienceSection() {
                 aiMode="improve"
               />
             </Field>
-          </div>
+          </ItemCard>
         ))}
         <button
           onClick={addItem}

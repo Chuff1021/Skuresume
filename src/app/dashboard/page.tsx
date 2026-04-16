@@ -15,8 +15,10 @@ import {
   House,
   UploadSimple,
   X,
+  Sparkle,
 } from "@phosphor-icons/react";
 import { getTemplate } from "@/components/resume/templates";
+import { QuickStartDialog } from "@/components/dashboard/quickstart-dialog";
 import type { ResumeData } from "@/types/resume";
 
 interface Resume {
@@ -59,6 +61,7 @@ export default function DashboardPage() {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [quickStartOpen, setQuickStartOpen] = useState(false);
 
   const fetchResumes = useCallback(async () => {
     try {
@@ -182,15 +185,22 @@ export default function DashboardPage() {
               className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
             >
               <UploadSimple size={16} />
-              Import
+              <span className="hidden sm:inline">Import</span>
             </button>
             <button
               onClick={createResume}
               disabled={creating}
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"
             >
               <Plus size={16} />
-              {creating ? "Creating..." : "New Resume"}
+              <span className="hidden sm:inline">{creating ? "Creating..." : "Blank"}</span>
+            </button>
+            <button
+              onClick={() => setQuickStartOpen(true)}
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <Sparkle size={16} weight="fill" />
+              AI Quick Start
             </button>
           </div>
         </div>
@@ -221,20 +231,46 @@ export default function DashboardPage() {
             </div>
             <h2 className="text-xl font-semibold mb-2">No resumes yet</h2>
             <p className="text-muted-foreground mb-6 text-sm">
-              Create your first resume to get started
+              Drop your background and let AI draft a recruiter-ready resume in seconds.
             </p>
-            <button
-              onClick={createResume}
-              disabled={creating}
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-            >
-              <Plus size={16} />
-              {creating ? "Creating..." : "Create Resume"}
-            </button>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setQuickStartOpen(true)}
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <Sparkle size={16} weight="fill" />
+                AI Quick Start
+              </button>
+              <button
+                onClick={createResume}
+                disabled={creating}
+                className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"
+              >
+                <Plus size={16} />
+                {creating ? "Creating..." : "Start Blank"}
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-            {/* Create new card */}
+            {/* AI Quick Start card */}
+            <motion.button
+              onClick={() => setQuickStartOpen(true)}
+              className="aspect-page rounded-md border-2 border-dashed border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-colors flex flex-col items-center justify-center gap-3 group"
+              whileHover={{ y: -2, scale: 1.005 }}
+              whileTap={{ scale: 0.995 }}
+              transition={{ type: "spring", stiffness: 320, damping: 28 }}
+            >
+              <div className="size-12 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+                <Sparkle size={24} weight="fill" className="text-primary" />
+              </div>
+              <div className="text-center px-3">
+                <div className="text-sm font-semibold text-foreground">AI Quick Start</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Drop your background, get a draft</div>
+              </div>
+            </motion.button>
+
+            {/* Blank resume card */}
             <motion.button
               onClick={createResume}
               disabled={creating}
@@ -247,7 +283,7 @@ export default function DashboardPage() {
                 <Plus size={24} className="text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
               <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                {creating ? "Creating..." : "New Resume"}
+                {creating ? "Creating..." : "Start Blank"}
               </span>
             </motion.button>
 
@@ -349,6 +385,13 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      {/* AI Quick Start */}
+      <AnimatePresence>
+        {quickStartOpen && (
+          <QuickStartDialog onClose={() => setQuickStartOpen(false)} />
+        )}
+      </AnimatePresence>
 
       {/* Import Modal */}
       <AnimatePresence>

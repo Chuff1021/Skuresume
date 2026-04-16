@@ -20,6 +20,7 @@ export function SummarySection() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          headline: data.basics.headline,
           experience: data.sections.experience.items,
           skills: data.sections.skills.items,
           education: data.sections.education.items,

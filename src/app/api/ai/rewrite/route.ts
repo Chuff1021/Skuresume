@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { nvidiaModel } from "@/lib/ai";
+import { nvidiaModel, NO_THINK } from "@/lib/ai";
 
 export async function POST(request: Request) {
   const { text, tone = "professional" } = await request.json();
@@ -9,14 +9,25 @@ export async function POST(request: Request) {
   }
 
   const toneGuide: Record<string, string> = {
-    professional: "Use a confident, professional tone with strong action verbs and quantified results.",
-    friendly: "Use a warm, approachable tone while maintaining professionalism.",
-    concise: "Be extremely concise and direct. Remove filler words. Keep only the most impactful points.",
+    professional:
+      "Confident, executive tone. Past-tense action verbs, quantified outcomes, ATS-friendly. No clichés.",
+    friendly:
+      "Warm and human while staying credible. Active voice, plain words, no slang. Still quantify impact.",
+    concise:
+      "Ruthlessly tight. Cut filler, adjectives, and adverbs. Aim for ~30% shorter than the input. Preserve every fact and number.",
   };
 
   const result = streamText({
     model: nvidiaModel,
-    system: `You are a professional resume writer. Rewrite the provided text to be more impactful for a resume. ${toneGuide[tone] || toneGuide.professional} Return ONLY the rewritten text, nothing else.`,
+    system: `${NO_THINK}You are a senior resume writer. Rewrite the user's text for a resume.
+
+Tone: ${toneGuide[tone] || toneGuide.professional}
+
+Hard rules:
+- Preserve every concrete fact (companies, dates, numbers, tools).
+- Strong action verbs, no "Responsible for / Helped / Worked on".
+- Keep the input format (bullets → bullets, paragraph → paragraph).
+- Output ONLY the rewritten text. No preamble, no markdown fences, no "Here is...".`,
     prompt: text,
   });
 

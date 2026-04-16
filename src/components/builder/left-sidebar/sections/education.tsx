@@ -1,8 +1,8 @@
 "use client";
 
-import { GraduationCap, Plus, Trash, DotsSixVertical as GripVertical } from "@phosphor-icons/react";
+import { GraduationCap, Plus } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
-import { SectionBase, Field, Input, TextAreaWithAI } from "../section-base";
+import { SectionBase, ItemCard, Field, Input, TextAreaWithAI } from "../section-base";
 import type { EducationItem } from "@/types/resume";
 
 function createEducationItem(): EducationItem {
@@ -63,24 +63,13 @@ export function EducationSection() {
     >
       <div className="space-y-4">
         {items.map((item) => (
-          <div
+          <ItemCard
             key={item.id}
-            className="p-3 rounded-lg bg-card border border-border space-y-3"
+            label={item.studyType || item.institution || "New Degree"}
+            hidden={item.hidden}
+            onToggleHidden={() => updateData((d) => { const i = d.sections.education.items.find((x) => x.id === item.id); if (i) i.hidden = !i.hidden; })}
+            onDelete={() => removeItem(item.id)}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <GripVertical size={16} className="text-muted-foreground cursor-grab" />
-                <span className="text-xs font-medium text-muted">
-                  {item.institution || item.area || "New Education"}
-                </span>
-              </div>
-              <button
-                onClick={() => removeItem(item.id)}
-                className="w-6 h-6 rounded hover:bg-destructive/10 flex items-center justify-center transition-colors"
-              >
-                <Trash size={14} className="text-destructive" />
-              </button>
-            </div>
             <div className="grid grid-cols-2 gap-2">
               <Field label="Institution">
                 <Input
@@ -127,7 +116,7 @@ export function EducationSection() {
                 rows={2}
               />
             </Field>
-          </div>
+          </ItemCard>
         ))}
         <button
           onClick={addItem}

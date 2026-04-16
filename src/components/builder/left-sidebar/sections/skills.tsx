@@ -1,8 +1,8 @@
 "use client";
 
-import { Wrench, Plus, Trash, DotsSixVertical as GripVertical } from "@phosphor-icons/react";
+import { Wrench, Plus } from "@phosphor-icons/react";
 import { useResumeStore } from "@/stores/resume";
-import { SectionBase, Field, Input } from "../section-base";
+import { SectionBase, ItemCard, Field, Input } from "../section-base";
 import type { SkillItem } from "@/types/resume";
 
 function createSkillItem(): SkillItem {
@@ -60,24 +60,13 @@ export function SkillsSection() {
     >
       <div className="space-y-3">
         {items.map((item) => (
-          <div
+          <ItemCard
             key={item.id}
-            className="p-3 rounded-lg bg-card border border-border space-y-2"
+            label={item.name || "New Skill"}
+            hidden={item.hidden}
+            onToggleHidden={() => updateData((d) => { const i = d.sections.skills.items.find((x) => x.id === item.id); if (i) i.hidden = !i.hidden; })}
+            onDelete={() => removeItem(item.id)}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <GripVertical size={16} className="text-muted-foreground cursor-grab" />
-                <span className="text-xs font-medium text-muted">
-                  {item.name || "New Skill"}
-                </span>
-              </div>
-              <button
-                onClick={() => removeItem(item.id)}
-                className="w-6 h-6 rounded hover:bg-destructive/10 flex items-center justify-center transition-colors"
-              >
-                <Trash size={14} className="text-destructive" />
-              </button>
-            </div>
             <div className="grid grid-cols-2 gap-2">
               <Field label="Skill Name">
                 <Input
@@ -116,7 +105,7 @@ export function SkillsSection() {
                 placeholder="TypeScript, Node.js, GraphQL"
               />
             </Field>
-          </div>
+          </ItemCard>
         ))}
         <button
           onClick={addItem}
