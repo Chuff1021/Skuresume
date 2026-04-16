@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { Sparkle, CircleNotch, X, Lightbulb } from "@phosphor-icons/react";
+import { Sparkle, CircleNotch, X, Lightbulb, UploadSimple, FileText } from "@phosphor-icons/react";
 
 interface QuickStartDialogProps {
   onClose: () => void;
 }
 
-const PLACEHOLDER = `Paste your existing resume, copy your LinkedIn About + Experience, or just tell your story — anything works.
+const PLACEHOLDER = `Upload your current resume above, paste it here, or just tell your story — anything works.
 
 Example:
 "I'm Jane Doe, a senior software engineer in Austin with 8 years of backend experience.
@@ -25,7 +25,45 @@ export function QuickStartDialog({ onClose }: QuickStartDialogProps) {
   const [intake, setIntake] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const [uploadedName, setUploadedName] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (file: File) => {
+    setError(null);
+    setExtracting(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/extract", { method: "POST", body: form });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Couldn't read that file.");
+      }
+      const { text } = await res.json();
+      setIntake((prev) => (prev.trim() ? `${prev}\n\n${text}` : text));
+      setUploadedName(file.name);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) void handleFile(file);
+    e.target.value = ""; // allow re-selecting the same file
+  };
+
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) void handleFile(file);
+  };
 
   const handleGenerate = async () => {
     setError(null);
@@ -122,6 +160,61 @@ export function QuickStartDialog({ onClose }: QuickStartDialogProps) {
             />
           </div>
 
+          {/* Upload current resume */}
+          <div>
+            <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
+              Upload your current resume <span className="text-muted-foreground/60">(PDF, DOCX, or TXT — we'll extract the text for you)</span>
+            </label>
+            <div
+              onDragOver={(e) => { e.preventDefault(); if (!generating && !extracting) setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={onDrop}
+              className={`relative flex items-center gap-3 rounded-md border border-dashed px-3 py-3 transition-colors cursor-pointer ${
+                isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-secondary/40"
+              } ${generating || extracting ? "opacity-60 pointer-events-none" : ""}`}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <div className="size-9 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                {extracting ? (
+                  <CircleNotch size={18} className="text-primary animate-spin" />
+                ) : uploadedName ? (
+                  <FileText size={18} className="text-primary" weight="fill" />
+                ) : (
+                  <UploadSimple size={18} className="text-primary" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                {extracting ? (
+                  <div className="text-sm">Reading your resume…</div>
+                ) : uploadedName ? (
+                  <>
+                    <div className="text-sm font-medium truncate">{uploadedName}</div>
+                    <div className="text-xs text-muted-foreground">Extracted — edit below if you'd like, or generate.</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-sm font-medium">Drop your resume here or click to choose</div>
+                    <div className="text-xs text-muted-foreground">Works with exported PDFs, Word .docx, or plain text</div>
+                  </>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                onChange={onFileInputChange}
+                disabled={generating || extracting}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+            <span className="flex-1 h-px bg-border" />
+            <span>or write / paste</span>
+            <span className="flex-1 h-px bg-border" />
+          </div>
+
           <div>
             <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
               Your background
@@ -130,8 +223,8 @@ export function QuickStartDialog({ onClose }: QuickStartDialogProps) {
               value={intake}
               onChange={(e) => setIntake(e.target.value)}
               placeholder={PLACEHOLDER}
-              rows={14}
-              disabled={generating}
+              rows={10}
+              disabled={generating || extracting}
               className="w-full px-3 py-2 text-sm bg-card border border-border rounded-md outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none font-mono leading-relaxed disabled:opacity-50"
             />
             <div className="flex items-center justify-between mt-1.5">
@@ -163,7 +256,7 @@ export function QuickStartDialog({ onClose }: QuickStartDialogProps) {
           </button>
           <button
             onClick={handleGenerate}
-            disabled={generating || intake.trim().length < 30}
+            disabled={generating || extracting || intake.trim().length < 30}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {generating ? (

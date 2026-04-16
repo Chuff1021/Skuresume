@@ -139,7 +139,7 @@ export function PikachuTemplate({ data }: { data: ResumeData }) {
               {getItems("languages").map((item: any) => (
                 <div key={item.id} style={{ fontSize: bf.fontSize - 1, marginBottom: 3 }}>
                   <strong>{item.name}</strong>
-                  {item.description && <span style={{ opacity: 0.7 }}> \u2014 {item.description}</span>}
+                  {item.description && <span style={{ opacity: 0.7 }}>{" — "}{item.description}</span>}
                 </div>
               ))}
             </div>

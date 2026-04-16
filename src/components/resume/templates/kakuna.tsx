@@ -246,7 +246,7 @@ export function KakunaTemplate({ data }: { data: ResumeData }) {
               {getItems("languages").map((item: any) => (
                 <span key={item.id}>
                   <strong>{item.name}</strong>
-                  {item.description && <span style={{ opacity: 0.6 }}> \u2014 {item.description}</span>}
+                  {item.description && <span style={{ opacity: 0.6 }}>{" — "}{item.description}</span>}
                 </span>
               ))}
             </div>
@@ -277,7 +277,7 @@ export function KakunaTemplate({ data }: { data: ResumeData }) {
             {getItems("certifications").map((item: any) => (
               <div key={item.id} style={{ marginBottom: 4, fontSize: bf.fontSize - 1 }}>
                 <span style={{ fontWeight: 600 }}>{item.name}</span>
-                {item.issuer && <span style={{ opacity: 0.6 }}> \u2014 {item.issuer}</span>}
+                {item.issuer && <span style={{ opacity: 0.6 }}>{" — "}{item.issuer}</span>}
                 {item.date && <span style={{ fontSize: bf.fontSize - 2, opacity: 0.5 }}> ({item.date})</span>}
               </div>
             ))}
