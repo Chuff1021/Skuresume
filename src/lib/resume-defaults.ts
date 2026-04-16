@@ -1,5 +1,10 @@
 import type { ResumeData } from "@/types/resume";
 
+// Default typography/color system tuned for production-quality output.
+// Body sits at 10.5pt (11.5 px at 72dpi ~ 14 px at 96dpi) which is the sweet
+// spot for a printed resume: small enough to fit real content, big enough to
+// read without eye strain. Name is 26pt for a strong visual anchor.
+// Margins are 0.65 inch (~62 px @ 96dpi) — the spec calls for 0.5-0.75.
 export function createDefaultResumeData(): ResumeData {
   return {
     basics: {
@@ -13,9 +18,9 @@ export function createDefaultResumeData(): ResumeData {
     },
     picture: {
       url: "",
-      size: 64,
+      size: 88,
       aspectRatio: 1,
-      borderRadius: 0,
+      borderRadius: 999,
       effects: { hidden: false, border: false, grayscale: false },
     },
     summary: "",
@@ -37,7 +42,7 @@ export function createDefaultResumeData(): ResumeData {
     metadata: {
       template: "onyx",
       layout: {
-        sidebarWidth: 30,
+        sidebarWidth: 32,
         pages: [
           {
             fullWidth: false,
@@ -48,33 +53,33 @@ export function createDefaultResumeData(): ResumeData {
       },
       css: { enabled: false, value: "" },
       page: {
-        gapX: 16,
-        gapY: 16,
-        marginX: 32,
-        marginY: 32,
-        format: "a4",
+        gapX: 20,
+        gapY: 18,
+        marginX: 62,
+        marginY: 56,
+        format: "letter",
         hideIcons: false,
       },
       design: {
         colors: {
-          primary: "#2563eb",
-          text: "#000000",
-          background: "#ffffff",
+          primary: "#0F4C81",   // Modern executive navy
+          text: "#1F2937",      // Gray-800 (softer than pure black)
+          background: "#FFFFFF",
         },
-        level: { type: "progress-bar" },
+        level: { type: "rectangle" },
       },
       typography: {
         body: {
-          fontFamily: "IBM Plex Serif",
+          fontFamily: "Source Serif 4",
           fontWeight: 400,
-          fontSize: 14,
-          lineHeight: 1.5,
+          fontSize: 11,
+          lineHeight: 1.45,
         },
         heading: {
-          fontFamily: "Fira Sans Condensed",
+          fontFamily: "Inter",
           fontWeight: 700,
-          fontSize: 20,
-          lineHeight: 1.2,
+          fontSize: 26,
+          lineHeight: 1.15,
         },
       },
       notes: "",

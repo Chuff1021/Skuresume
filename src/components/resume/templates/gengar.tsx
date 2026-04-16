@@ -1,390 +1,345 @@
 "use client";
 
 import type { ResumeData } from "@/types/resume";
+import {
+  BulletList,
+  MUTED_INK,
+  MetaLine,
+  RowTitleDate,
+  SectionTitle,
+  hasItems,
+  items,
+  typo,
+} from "../shared/primitives";
 
-// === Shared Helpers ===
+// Gengar — 32% sidebar with tinted background on the LEFT.
+// Sidebar: name, photo, contact, skills, languages, certifications, interests
+// Main: summary, experience, education, projects, awards
 
-function ContactIcon({ type, size }: { type: string; size: number }) {
-  const icons: Record<string, string> = { email: "\u2709", phone: "\u2706", location: "\u25C9", website: "\u2197" };
-  return <span style={{ fontSize: size, marginRight: 6, verticalAlign: "middle", opacity: 0.85 }}>{icons[type] || ""}</span>;
-}
-
-function LevelSquares({ level, color }: { level: number; color: string }) {
-  return (
-    <span>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} style={{ color: i < level ? color : "rgba(255,255,255,0.3)", marginRight: 2, fontSize: 10 }}>{"\u25A0"}</span>
-      ))}
-    </span>
-  );
-}
-
-function BulletDescription({ text, fontSize }: { text: string; fontSize: number }) {
-  const lines = text.split("\n").filter(Boolean);
-  return (
-    <div>
-      {lines.map((line, i) => (
-        <div key={i} style={{ fontSize: fontSize - 1, paddingLeft: 12, textIndent: -12, marginTop: i > 0 ? 3 : 0 }}>
-          {"\u2022"} {line.replace(/^[\u2022\-\*]\s*/, "")}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function proficiencyLabel(level: number): string {
-  if (level >= 5) return "Expert";
-  if (level >= 4) return "Advanced";
-  if (level >= 3) return "Intermediate";
-  if (level >= 2) return "Beginner";
-  return "Novice";
-}
-
-// Gengar: TWO COLUMN - sidebar LEFT with PURPLE/INDIGO BACKGROUND filling full height
-// Sidebar: Photo at top, Name (white text on purple bg), headline, contact items (vertical, white text with icons), then Certifications, Awards, Languages
-// Main: Starts with a LIGHT PURPLE tinted summary box at top, then Online Presence, Skills, Education, Experience
 export function GengarTemplate({ data }: { data: ResumeData }) {
-  const { basics, summary, sections, metadata, picture } = data;
-  const c = metadata.design.colors;
-  const bf = metadata.typography.body;
-  const hf = metadata.typography.heading;
+  const { basics, summary, metadata, picture } = data;
+  const accent = metadata.design.colors.primary;
+  const muted = MUTED_INK;
+  const t = typo(data);
   const m = metadata.page;
-  const sw = metadata.layout.sidebarWidth;
-
-  const visible = (key: string) => {
-    const s = sections[key as keyof typeof sections];
-    return s && s.visible && s.items.filter((i: any) => !i.hidden).length > 0;
-  };
-
-  const getItems = (key: string) => {
-    const s = sections[key as keyof typeof sections];
-    return s ? s.items.filter((i: any) => !i.hidden) : [];
-  };
+  const sidebarW = Math.min(38, Math.max(26, metadata.layout.sidebarWidth));
+  const hasPhoto = !!picture.url && !picture.effects.hidden;
+  const sidebarBg = `${accent}0E`;
+  const sidebarMuted = muted;
 
   return (
     <div
-      className="w-full h-full overflow-hidden relative"
+      className="resume-gengar"
       style={{
-        fontFamily: bf.fontFamily,
-        fontSize: bf.fontSize,
-        lineHeight: bf.lineHeight,
-        color: c.text,
-        backgroundColor: c.background,
+        width: "100%",
+        minHeight: "100%",
+        backgroundColor: metadata.design.colors.background,
+        color: metadata.design.colors.text,
+        fontFamily: t.bodyFamily,
+        fontSize: t.body,
+        lineHeight: metadata.typography.body.lineHeight,
+        display: "flex",
+        boxSizing: "border-box",
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
       }}
     >
-      {/* Sidebar purple background panel - full height */}
-      <div style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: `${sw}%`, backgroundColor: c.primary }} />
-
-      <div style={{ position: "relative", display: "flex", height: "100%" }}>
-        {/* Sidebar LEFT - on purple bg */}
-        <div
-          style={{
-            width: `${sw}%`,
-            display: "flex",
-            flexDirection: "column",
-            color: "#ffffff",
-            overflow: "hidden",
-          }}
-        >
-          {/* Photo */}
-          <div style={{ padding: `${m.marginY}px ${m.marginX * 0.7}px 0` }}>
-            {picture.url && !picture.effects.hidden && (
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-                <img
-                  src={picture.url}
-                  alt=""
-                  style={{
-                    width: picture.size,
-                    height: picture.size / picture.aspectRatio,
-                    borderRadius: picture.borderRadius,
-                    objectFit: "cover",
-                    border: picture.effects.border ? "2px solid rgba(255,255,255,0.5)" : "none",
-                    filter: picture.effects.grayscale ? "grayscale(100%)" : "none",
-                  }}
-                />
-              </div>
-            )}
-
-            {/* Name + headline */}
-            <h1
+      {/* Sidebar */}
+      <aside
+        style={{
+          width: `${sidebarW}%`,
+          backgroundColor: sidebarBg,
+          padding: `${m.marginY}px ${Math.max(20, Math.round(m.marginX * 0.55))}px`,
+          display: "flex",
+          flexDirection: "column",
+          gap: Math.max(14, m.gapY),
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
+          boxSizing: "border-box",
+        }}
+      >
+        <div>
+          {hasPhoto ? (
+            <img
+              src={picture.url}
+              alt=""
               style={{
-                fontFamily: hf.fontFamily,
-                fontWeight: hf.fontWeight,
-                fontSize: hf.fontSize * 1.3,
-                lineHeight: 1.2,
-                color: "#ffffff",
-                margin: 0,
+                width: picture.size,
+                height: picture.size,
+                borderRadius: picture.borderRadius ? picture.borderRadius : 999,
+                objectFit: "cover",
+                marginBottom: 12,
+                border: picture.effects.border ? `2px solid ${accent}` : "none",
+                filter: picture.effects.grayscale ? "grayscale(100%)" : "none",
               }}
-            >
-              {basics.name || "Your Name"}
-            </h1>
-            {basics.headline && (
-              <p style={{ fontSize: bf.fontSize - 1, opacity: 0.85, marginTop: 4 }}>{basics.headline}</p>
-            )}
-
-            {/* Contact - vertical with icons */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 14, fontSize: bf.fontSize - 2 }}>
-              {basics.email && <span><ContactIcon type="email" size={bf.fontSize - 1} />{basics.email}</span>}
-              {basics.phone && <span><ContactIcon type="phone" size={bf.fontSize - 1} />{basics.phone}</span>}
-              {basics.location && <span><ContactIcon type="location" size={bf.fontSize - 1} />{basics.location}</span>}
-              {basics.url.url && <span><ContactIcon type="website" size={bf.fontSize - 1} />{basics.url.url}</span>}
+            />
+          ) : null}
+          <h1
+            style={{
+              fontFamily: t.displayFamily,
+              fontSize: Math.max(22, t.nameSize - 2),
+              fontWeight: 700,
+              color: accent,
+              margin: 0,
+              lineHeight: 1.1,
+              letterSpacing: -0.5,
+            }}
+          >
+            {basics.name || "Your Name"}
+          </h1>
+          {basics.headline ? (
+            <div style={{ fontSize: t.body, fontStyle: "italic", marginTop: 4, color: sidebarMuted }}>
+              {basics.headline}
             </div>
-          </div>
-
-          {/* Sidebar sections */}
-          <div style={{ padding: `${m.gapY}px ${m.marginX * 0.7}px ${m.marginY}px`, display: "flex", flexDirection: "column", gap: m.gapY }}>
-            {/* Certifications */}
-            {visible("certifications") && (
-              <div>
-                <SideHead title={sections.certifications.name} />
-                {getItems("certifications").map((item: any) => (
-                  <div key={item.id} style={{ marginBottom: 6, fontSize: bf.fontSize - 1 }}>
-                    <div style={{ fontWeight: 600 }}>{item.name}</div>
-                    {item.issuer && <div style={{ opacity: 0.7, fontSize: bf.fontSize - 2 }}>{item.issuer}{item.date && ` \u2014 ${item.date}`}</div>}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Awards */}
-            {visible("awards") && (
-              <div>
-                <SideHead title={sections.awards.name} />
-                {getItems("awards").map((item: any) => (
-                  <div key={item.id} style={{ marginBottom: 6, fontSize: bf.fontSize - 1 }}>
-                    <div style={{ fontWeight: 600 }}>{item.title}</div>
-                    {item.awarder && <div style={{ opacity: 0.7, fontSize: bf.fontSize - 2 }}>{item.awarder}</div>}
-                    {item.date && <div style={{ opacity: 0.5, fontSize: bf.fontSize - 2 }}>{item.date}</div>}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Languages */}
-            {visible("languages") && (
-              <div>
-                <SideHead title={sections.languages.name} />
-                {getItems("languages").map((item: any) => (
-                  <div key={item.id} style={{ fontSize: bf.fontSize - 1, marginBottom: 3 }}>
-                    <strong>{item.name}</strong>
-                    {item.description && <span style={{ opacity: 0.7 }}> \u2014 {item.description}</span>}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Interests */}
-            {visible("interests") && (
-              <div>
-                <SideHead title={sections.interests.name} />
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {getItems("interests").map((item: any) => (
-                    <span key={item.id} style={{ padding: "2px 8px", borderRadius: 4, backgroundColor: "rgba(255,255,255,0.15)", fontSize: bf.fontSize - 2 }}>{item.name}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* References */}
-            {visible("references") && (
-              <div>
-                <SideHead title={sections.references.name} />
-                {getItems("references").map((item: any) => (
-                  <div key={item.id} style={{ marginBottom: 6, fontSize: bf.fontSize - 1 }}>
-                    <div style={{ fontWeight: 600 }}>{item.name}</div>
-                    {item.description && <div style={{ opacity: 0.7, fontSize: bf.fontSize - 2 }}>{item.description}</div>}
-                    {item.summary && <div style={{ fontStyle: "italic", opacity: 0.7, marginTop: 2, fontSize: bf.fontSize - 2 }}>&ldquo;{item.summary}&rdquo;</div>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          ) : null}
         </div>
 
-        {/* Main RIGHT */}
-        <div
-          style={{
-            flex: 1,
-            padding: `${m.marginY}px ${m.marginX}px`,
-            display: "flex",
-            flexDirection: "column",
-            gap: m.gapY,
-          }}
-        >
-          {/* Summary with tinted bg */}
-          {summary && (
-            <div style={{ backgroundColor: `${c.primary}15`, padding: `${m.gapY * 0.8}px ${m.gapX}px`, borderRadius: 6 }}>
-              <p style={{ fontSize: bf.fontSize - 1, whiteSpace: "pre-wrap", margin: 0 }}>{summary}</p>
+        {(basics.email || basics.phone || basics.location || basics.url.url) ? (
+          <section>
+            <SectionTitle title="Contact" color={accent} size={t.sectionSize} family={t.displayFamily} variant="plain" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 3, fontFamily: t.bodyFamily, fontSize: t.small, color: sidebarMuted }}>
+              {basics.location ? <div>{basics.location}</div> : null}
+              {basics.email ? <div>{basics.email}</div> : null}
+              {basics.phone ? <div>{basics.phone}</div> : null}
+              {basics.url.url ? <div>{basics.url.label || basics.url.url.replace(/^https?:\/\//, "")}</div> : null}
             </div>
-          )}
+          </section>
+        ) : null}
 
-          {/* Online Presence */}
-          {visible("profiles") && (
-            <div>
-              <MainHead title={sections.profiles.name} c={c} hf={hf} />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                {getItems("profiles").map((item: any) => (
-                  <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    {item.icon && <span style={{ fontSize: bf.fontSize + 2 }}>{item.icon}</span>}
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: bf.fontSize - 1 }}>{item.network}</div>
-                      <div style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>@{item.username}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Skills */}
-          {visible("skills") && (
-            <div>
-              <MainHead title={sections.skills.name} c={c} hf={hf} />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
-                {getItems("skills").map((item: any) => (
-                  <div key={item.id}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div>
-                        <span style={{ fontWeight: 700, fontSize: bf.fontSize - 1 }}>{item.name}</span>
-                        <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6, marginLeft: 6 }}>{proficiencyLabel(item.level)}</span>
-                      </div>
-                      <LevelSquares level={item.level} color={c.primary} />
-                    </div>
-                    {item.keywords?.length > 0 && (
-                      <div style={{ fontSize: bf.fontSize - 2, opacity: 0.5, marginTop: 2 }}>{item.keywords.join(", ")}</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Education */}
-          {visible("education") && (
-            <div>
-              <MainHead title={sections.education.name} c={c} hf={hf} />
-              {getItems("education").map((item: any) => (
-                <div key={item.id} style={{ marginBottom: 8 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <span style={{ fontWeight: 700 }}>{item.institution}</span>
-                    <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.date}</span>
-                  </div>
-                  <div style={{ fontSize: bf.fontSize - 1, opacity: 0.8 }}>
-                    {item.studyType}{item.area && ` in ${item.area}`}{item.score && ` \u2014 ${item.score}`}
-                  </div>
-                  {item.description && <div style={{ marginTop: 3 }}><BulletDescription text={item.description} fontSize={bf.fontSize} /></div>}
+        {hasItems(data.sections.skills) ? (
+          <section>
+            <SectionTitle title={data.sections.skills.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="plain" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {items(data.sections.skills).map((item) => (
+                <div key={item.id} style={{ fontFamily: t.bodyFamily, fontSize: t.small, lineHeight: 1.4 }}>
+                  {item.name ? <div style={{ fontWeight: 700, color: "inherit" }}>{item.name}</div> : null}
+                  {item.keywords?.length ? (
+                    <div style={{ color: sidebarMuted }}>{item.keywords.join(", ")}</div>
+                  ) : item.description ? (
+                    <div style={{ color: sidebarMuted }}>{item.description}</div>
+                  ) : null}
                 </div>
               ))}
             </div>
-          )}
+          </section>
+        ) : null}
 
-          {/* Experience */}
-          {visible("experience") && (
-            <div>
-              <MainHead title={sections.experience.name} c={c} hf={hf} />
-              {getItems("experience").map((item: any) => (
-                <div key={item.id} style={{ marginBottom: 10 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <div>
-                      <span style={{ fontWeight: 700 }}>{item.position}</span>
-                      {item.company && <span style={{ color: c.primary }}> at {item.company}</span>}
-                    </div>
-                    <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6, whiteSpace: "nowrap" }}>{item.date}</span>
+        {hasItems(data.sections.languages) ? (
+          <section>
+            <SectionTitle title={data.sections.languages.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="plain" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 3, fontSize: t.small }}>
+              {items(data.sections.languages).map((l) => (
+                <div key={l.id}>
+                  <strong>{l.name}</strong>
+                  {l.description ? <span style={{ color: sidebarMuted }}> — {l.description}</span> : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {hasItems(data.sections.certifications) ? (
+          <section>
+            <SectionTitle title={data.sections.certifications.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="plain" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: t.small }}>
+              {items(data.sections.certifications).map((c) => (
+                <div key={c.id}>
+                  <div style={{ fontWeight: 700 }}>{c.name}</div>
+                  <div style={{ color: sidebarMuted }}>
+                    {[c.issuer, c.date].filter(Boolean).join(" · ")}
                   </div>
-                  {item.location && <div style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.location}</div>}
-                  {item.description && <div style={{ marginTop: 4 }}><BulletDescription text={item.description} fontSize={bf.fontSize} /></div>}
                 </div>
               ))}
             </div>
-          )}
+          </section>
+        ) : null}
 
-          {/* Projects */}
-          {visible("projects") && (
-            <div>
-              <MainHead title={sections.projects.name} c={c} hf={hf} />
-              {getItems("projects").map((item: any) => (
-                <div key={item.id} style={{ marginBottom: 8 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <span style={{ fontWeight: 600 }}>{item.name}</span>
-                    {item.date && <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.date}</span>}
+        {hasItems(data.sections.profiles) ? (
+          <section>
+            <SectionTitle title={data.sections.profiles.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="plain" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 3, fontSize: t.small }}>
+              {items(data.sections.profiles).map((p) => (
+                <div key={p.id}>
+                  <strong>{p.network}</strong>
+                  {p.username || p.url?.url ? (
+                    <div style={{ color: sidebarMuted }}>{p.url?.url || p.username}</div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {hasItems(data.sections.interests) ? (
+          <section>
+            <SectionTitle title={data.sections.interests.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="plain" />
+            <div style={{ fontSize: t.small, color: sidebarMuted }}>
+              {items(data.sections.interests).map((i) => i.name).join(" · ")}
+            </div>
+          </section>
+        ) : null}
+      </aside>
+
+      {/* Main */}
+      <main
+        style={{
+          flex: 1,
+          padding: `${m.marginY}px ${m.marginX}px`,
+          display: "flex",
+          flexDirection: "column",
+          gap: Math.max(14, m.gapY),
+          boxSizing: "border-box",
+        }}
+      >
+        {summary ? (
+          <section>
+            <SectionTitle title="Summary" color={accent} size={t.sectionSize} family={t.displayFamily} variant="ruled" />
+            <p style={{ fontSize: t.body, lineHeight: 1.5, margin: 0, whiteSpace: "pre-wrap" }}>{summary}</p>
+          </section>
+        ) : null}
+
+        {hasItems(data.sections.experience) ? (
+          <section>
+            <SectionTitle title={data.sections.experience.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="ruled" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {items(data.sections.experience).map((item) => (
+                <div key={item.id} className="resume-section-item">
+                  <RowTitleDate
+                    primary={item.position || ""}
+                    date={item.date}
+                    accent={accent}
+                    bodyFamily={t.bodyFamily}
+                    baseSize={t.body}
+                    smallSize={t.small}
+                    muted={muted}
+                  />
+                  <MetaLine
+                    left={[item.company, item.location].filter(Boolean).join(" — ")}
+                    bodyFamily={t.bodyFamily}
+                    smallSize={t.small}
+                    muted={muted}
+                  />
+                  {item.description ? (
+                    <BulletList text={item.description} size={t.body} lineHeight={1.45} bulletColor={accent} />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {hasItems(data.sections.projects) ? (
+          <section>
+            <SectionTitle title={data.sections.projects.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="ruled" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {items(data.sections.projects).map((item) => (
+                <div key={item.id} className="resume-section-item">
+                  <RowTitleDate
+                    primary={item.name || ""}
+                    date={item.date}
+                    accent={accent}
+                    bodyFamily={t.bodyFamily}
+                    baseSize={t.body}
+                    smallSize={t.small}
+                    muted={muted}
+                  />
+                  {item.keywords?.length ? (
+                    <MetaLine
+                      left={item.keywords.join(" · ")}
+                      bodyFamily={t.bodyFamily}
+                      smallSize={t.small}
+                      muted={muted}
+                    />
+                  ) : null}
+                  {item.description ? (
+                    <BulletList text={item.description} size={t.body} lineHeight={1.45} bulletColor={accent} />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {hasItems(data.sections.education) ? (
+          <section>
+            <SectionTitle title={data.sections.education.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="ruled" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {items(data.sections.education).map((item) => (
+                <div key={item.id} className="resume-section-item">
+                  <RowTitleDate
+                    primary={[item.studyType, item.area].filter(Boolean).join(", ") || item.institution || ""}
+                    date={item.date}
+                    accent={accent}
+                    bodyFamily={t.bodyFamily}
+                    baseSize={t.body}
+                    smallSize={t.small}
+                    muted={muted}
+                  />
+                  <MetaLine
+                    left={item.institution}
+                    right={item.score ? `GPA ${item.score}` : undefined}
+                    bodyFamily={t.bodyFamily}
+                    smallSize={t.small}
+                    muted={muted}
+                  />
+                  {item.description ? (
+                    <BulletList text={item.description} size={t.body} lineHeight={1.4} bulletColor={accent} />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {hasItems(data.sections.awards) ? (
+          <section>
+            <SectionTitle title={data.sections.awards.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="ruled" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {items(data.sections.awards).map((item) => (
+                <div key={item.id} style={{ fontFamily: t.bodyFamily, fontSize: t.body }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                    <span>
+                      <span style={{ fontWeight: 700 }}>{item.title}</span>
+                      {item.awarder ? <span style={{ color: muted }}>{" — "}{item.awarder}</span> : null}
+                    </span>
+                    {item.date ? <span style={{ fontSize: t.small, color: muted, whiteSpace: "nowrap" }}>{item.date}</span> : null}
                   </div>
-                  {item.description && <div style={{ marginTop: 3 }}><BulletDescription text={item.description} fontSize={bf.fontSize} /></div>}
                 </div>
               ))}
             </div>
-          )}
+          </section>
+        ) : null}
 
-          {/* Volunteer */}
-          {visible("volunteer") && (
-            <div>
-              <MainHead title={sections.volunteer.name} c={c} hf={hf} />
-              {getItems("volunteer").map((item: any) => (
-                <div key={item.id} style={{ marginBottom: 8 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <div>
-                      <span style={{ fontWeight: 600 }}>{item.position}</span>
-                      {item.organization && <span style={{ color: c.primary }}> at {item.organization}</span>}
-                    </div>
-                    <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.date}</span>
-                  </div>
-                  {item.description && <div style={{ marginTop: 3 }}><BulletDescription text={item.description} fontSize={bf.fontSize} /></div>}
+        {hasItems(data.sections.volunteer) ? (
+          <section>
+            <SectionTitle title={data.sections.volunteer.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="ruled" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {items(data.sections.volunteer).map((item) => (
+                <div key={item.id} className="resume-section-item">
+                  <RowTitleDate
+                    primary={item.position || ""}
+                    date={item.date}
+                    accent={accent}
+                    bodyFamily={t.bodyFamily}
+                    baseSize={t.body}
+                    smallSize={t.small}
+                    muted={muted}
+                  />
+                  <MetaLine
+                    left={[item.organization, item.location].filter(Boolean).join(" — ")}
+                    bodyFamily={t.bodyFamily}
+                    smallSize={t.small}
+                    muted={muted}
+                  />
+                  {item.description ? (
+                    <BulletList text={item.description} size={t.body} lineHeight={1.45} bulletColor={accent} />
+                  ) : null}
                 </div>
               ))}
             </div>
-          )}
-
-          {/* Publications */}
-          {visible("publications") && (
-            <div>
-              <MainHead title={sections.publications.name} c={c} hf={hf} />
-              {getItems("publications").map((item: any) => (
-                <div key={item.id} style={{ marginBottom: 6 }}>
-                  <div style={{ fontWeight: 600 }}>{item.name}</div>
-                  {item.publisher && <div style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.publisher}{item.date && ` \u2014 ${item.date}`}</div>}
-                  {item.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 2, whiteSpace: "pre-wrap" }}>{item.description}</p>}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+          </section>
+        ) : null}
+      </main>
     </div>
-  );
-}
-
-function SideHead({ title }: { title: string }) {
-  return (
-    <h6 style={{
-      fontWeight: 700,
-      fontSize: 11,
-      textTransform: "uppercase",
-      letterSpacing: 1.5,
-      borderBottom: "1px solid rgba(255,255,255,0.3)",
-      paddingBottom: 3,
-      marginBottom: 8,
-      color: "#ffffff",
-      lineHeight: 1.3,
-    }}>
-      {title}
-    </h6>
-  );
-}
-
-function MainHead({ title, c, hf }: { title: string; c: { primary: string }; hf: { fontFamily: string; fontWeight: number; fontSize: number } }) {
-  return (
-    <h6 style={{
-      fontFamily: hf.fontFamily,
-      fontWeight: hf.fontWeight,
-      fontSize: hf.fontSize * 0.75,
-      color: c.primary,
-      textTransform: "uppercase",
-      letterSpacing: 1,
-      borderBottom: `2px solid ${c.primary}`,
-      paddingBottom: 3,
-      marginBottom: 8,
-      lineHeight: 1.3,
-    }}>
-      {title}
-    </h6>
   );
 }

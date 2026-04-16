@@ -1,375 +1,322 @@
 "use client";
 
 import type { ResumeData } from "@/types/resume";
+import {
+  BulletList,
+  MUTED_INK,
+  MetaLine,
+  RowTitleDate,
+  SectionTitle,
+  hasItems,
+  items,
+  typo,
+} from "../shared/primitives";
 
-// === Shared Helpers ===
+// Bronzor — classic centered single-column, the traditional "consulting /
+// finance" resume silhouette. Centered name header, thick accent underline,
+// centered section headings with an accent bar underneath.
 
-function ContactIcon({ type, color, size }: { type: string; color: string; size: number }) {
-  const icons: Record<string, string> = { email: "\u2709", phone: "\u2706", location: "\u25C9", website: "\u2197" };
-  return <span style={{ color, fontSize: size, marginRight: 4, verticalAlign: "middle" }}>{icons[type] || ""}</span>;
-}
-
-function LevelSquares({ level, color }: { level: number; color: string }) {
-  return (
-    <span>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} style={{ color: i < level ? color : "#d1d5db", marginRight: 2, fontSize: 10 }}>{"\u25A0"}</span>
-      ))}
-    </span>
-  );
-}
-
-function BulletDescription({ text, fontSize }: { text: string; fontSize: number }) {
-  const lines = text.split("\n").filter(Boolean);
-  return (
-    <div>
-      {lines.map((line, i) => (
-        <div key={i} style={{ fontSize: fontSize - 1, paddingLeft: 12, textIndent: -12, marginTop: i > 0 ? 3 : 0 }}>
-          {"\u2022"} {line.replace(/^[\u2022\-\*]\s*/, "")}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function proficiencyLabel(level: number): string {
-  if (level >= 5) return "Expert";
-  if (level >= 4) return "Advanced";
-  if (level >= 3) return "Intermediate";
-  if (level >= 2) return "Beginner";
-  return "Novice";
-}
-
-// Bronzor: Single column with GRID LAYOUT for sections
-// Header: Photo centered at top, name centered (large), headline (italic), contact row centered with bullet separators
-// Each section is a 2-COLUMN GRID: section title on LEFT (~20% width), content on RIGHT (~80%)
-// Section title and content separated by thin primary-colored top border
 export function BronzorTemplate({ data }: { data: ResumeData }) {
-  const { basics, summary, sections, metadata, picture } = data;
-  const c = metadata.design.colors;
-  const bf = metadata.typography.body;
-  const hf = metadata.typography.heading;
+  const { basics, summary, metadata, picture } = data;
+  const accent = metadata.design.colors.primary;
+  const muted = MUTED_INK;
+  const t = typo(data);
   const m = metadata.page;
+  const hasPhoto = !!picture.url && !picture.effects.hidden;
 
-  const visible = (key: string) => {
-    const s = sections[key as keyof typeof sections];
-    return s && s.visible && s.items.filter((i: any) => !i.hidden).length > 0;
-  };
-
-  const getItems = (key: string) => {
-    const s = sections[key as keyof typeof sections];
-    return s ? s.items.filter((i: any) => !i.hidden) : [];
-  };
+  const contactBits: string[] = [];
+  if (basics.location) contactBits.push(basics.location);
+  if (basics.email) contactBits.push(basics.email);
+  if (basics.phone) contactBits.push(basics.phone);
+  if (basics.url.url) contactBits.push(basics.url.label || basics.url.url.replace(/^https?:\/\//, ""));
 
   return (
     <div
-      className="w-full h-full overflow-hidden"
+      className="resume-bronzor"
       style={{
-        fontFamily: bf.fontFamily,
-        fontSize: bf.fontSize,
-        lineHeight: bf.lineHeight,
-        color: c.text,
-        backgroundColor: c.background,
+        width: "100%",
+        minHeight: "100%",
+        backgroundColor: metadata.design.colors.background,
+        color: metadata.design.colors.text,
+        fontFamily: t.bodyFamily,
+        fontSize: t.body,
+        lineHeight: metadata.typography.body.lineHeight,
         padding: `${m.marginY}px ${m.marginX}px`,
+        display: "flex",
+        flexDirection: "column",
+        gap: Math.max(14, m.gapY),
+        boxSizing: "border-box",
       }}
     >
-      {/* Header - centered */}
-      <div style={{ textAlign: "center", paddingBottom: m.gapY, borderBottom: `2px solid ${c.primary}` }}>
-        {picture.url && !picture.effects.hidden && (
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-            <img
-              src={picture.url}
-              alt=""
-              style={{
-                width: picture.size,
-                height: picture.size / picture.aspectRatio,
-                borderRadius: picture.borderRadius,
-                objectFit: "cover",
-                border: picture.effects.border ? `2px solid ${c.primary}` : "none",
-                filter: picture.effects.grayscale ? "grayscale(100%)" : "none",
-              }}
-            />
-          </div>
-        )}
+      {/* Centered header */}
+      <header style={{ textAlign: "center", paddingBottom: 14, borderBottom: `2px solid ${accent}` }}>
+        {hasPhoto ? (
+          <img
+            src={picture.url}
+            alt=""
+            style={{
+              width: picture.size,
+              height: picture.size,
+              borderRadius: picture.borderRadius ? picture.borderRadius : 999,
+              objectFit: "cover",
+              marginBottom: 10,
+              border: picture.effects.border ? `2px solid ${accent}` : "none",
+              filter: picture.effects.grayscale ? "grayscale(100%)" : "none",
+            }}
+          />
+        ) : null}
         <h1
           style={{
-            fontFamily: hf.fontFamily,
-            fontWeight: hf.fontWeight,
-            fontSize: hf.fontSize * 1.8,
-            lineHeight: 1.1,
-            margin: 0,
-            color: c.text,
+            fontFamily: t.displayFamily,
+            fontSize: t.nameSize,
+            fontWeight: 700,
+            letterSpacing: 1.5,
             textTransform: "uppercase",
-            letterSpacing: 3,
+            color: accent,
+            margin: 0,
+            lineHeight: 1.1,
           }}
         >
           {basics.name || "Your Name"}
         </h1>
-        {basics.headline && (
-          <p style={{ fontSize: bf.fontSize + 1, fontStyle: "italic", opacity: 0.7, marginTop: 4 }}>{basics.headline}</p>
-        )}
-        {/* Contact centered with bullet separators and icons */}
-        <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "0 4px", marginTop: 8, fontSize: bf.fontSize - 2, opacity: 0.7 }}>
-          {[
-            basics.email && { type: "email", value: basics.email },
-            basics.phone && { type: "phone", value: basics.phone },
-            basics.location && { type: "location", value: basics.location },
-            basics.url.url && { type: "website", value: basics.url.url },
-          ].filter(Boolean).map((item: any, idx, arr) => (
-            <span key={idx}>
-              <ContactIcon type={item.type} color={c.primary} size={bf.fontSize - 1} />
-              {item.value}
-              {idx < arr.length - 1 && <span style={{ margin: "0 6px", opacity: 0.4 }}>{"\u2022"}</span>}
-            </span>
-          ))}
-        </div>
-      </div>
+        {basics.headline ? (
+          <div
+            style={{
+              fontFamily: t.bodyFamily,
+              fontSize: t.body + 1,
+              fontStyle: "italic",
+              color: muted,
+              marginTop: 4,
+            }}
+          >
+            {basics.headline}
+          </div>
+        ) : null}
+        {contactBits.length ? (
+          <div style={{ fontFamily: t.bodyFamily, fontSize: t.small, color: muted, marginTop: 8 }}>
+            {contactBits.map((c, i) => (
+              <span key={i}>
+                {i > 0 ? <span style={{ margin: "0 8px", color: accent }}>{"|"}</span> : null}
+                {c}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </header>
 
-      {/* Grid sections: label left, content right */}
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {/* Summary */}
-        {summary && (
-          <GridRow title="Summary" c={c} hf={hf}>
-            <p style={{ fontSize: bf.fontSize - 1, whiteSpace: "pre-wrap", margin: 0 }}>{summary}</p>
-          </GridRow>
-        )}
+      {/* Summary */}
+      {summary ? (
+        <section>
+          <SectionTitle title="Summary" color={accent} size={t.sectionSize} family={t.displayFamily} variant="accent-bar" align="center" />
+          <p
+            style={{
+              fontFamily: t.bodyFamily,
+              fontSize: t.body,
+              lineHeight: 1.5,
+              margin: 0,
+              whiteSpace: "pre-wrap",
+              textAlign: "center",
+            }}
+          >
+            {summary}
+          </p>
+        </section>
+      ) : null}
 
-        {/* Profiles */}
-        {visible("profiles") && (
-          <GridRow title={sections.profiles.name} c={c} hf={hf}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-              {getItems("profiles").map((item: any) => (
-                <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  {item.icon && <span style={{ fontSize: bf.fontSize + 2 }}>{item.icon}</span>}
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: bf.fontSize - 1 }}>{item.network}</div>
-                    <div style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>@{item.username}</div>
-                  </div>
+      {/* Experience */}
+      {hasItems(data.sections.experience) ? (
+        <section>
+          <SectionTitle title={data.sections.experience.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="accent-bar" align="center" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {items(data.sections.experience).map((item) => (
+              <div key={item.id} className="resume-section-item">
+                <RowTitleDate
+                  primary={item.position || ""}
+                  date={item.date}
+                  accent={accent}
+                  bodyFamily={t.bodyFamily}
+                  baseSize={t.body}
+                  smallSize={t.small}
+                  muted={muted}
+                />
+                <MetaLine
+                  left={[item.company, item.location].filter(Boolean).join(" — ")}
+                  bodyFamily={t.bodyFamily}
+                  smallSize={t.small}
+                  muted={muted}
+                />
+                {item.description ? (
+                  <BulletList text={item.description} size={t.body} lineHeight={1.45} bulletColor={accent} />
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Projects */}
+      {hasItems(data.sections.projects) ? (
+        <section>
+          <SectionTitle title={data.sections.projects.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="accent-bar" align="center" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {items(data.sections.projects).map((item) => (
+              <div key={item.id} className="resume-section-item">
+                <RowTitleDate
+                  primary={item.name || ""}
+                  date={item.date}
+                  accent={accent}
+                  bodyFamily={t.bodyFamily}
+                  baseSize={t.body}
+                  smallSize={t.small}
+                  muted={muted}
+                />
+                {item.keywords?.length ? (
+                  <MetaLine
+                    left={item.keywords.join(" · ")}
+                    bodyFamily={t.bodyFamily}
+                    smallSize={t.small}
+                    muted={muted}
+                  />
+                ) : null}
+                {item.description ? (
+                  <BulletList text={item.description} size={t.body} lineHeight={1.45} bulletColor={accent} />
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Education */}
+      {hasItems(data.sections.education) ? (
+        <section>
+          <SectionTitle title={data.sections.education.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="accent-bar" align="center" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {items(data.sections.education).map((item) => (
+              <div key={item.id} className="resume-section-item">
+                <RowTitleDate
+                  primary={[item.studyType, item.area].filter(Boolean).join(", ") || item.institution || ""}
+                  date={item.date}
+                  accent={accent}
+                  bodyFamily={t.bodyFamily}
+                  baseSize={t.body}
+                  smallSize={t.small}
+                  muted={muted}
+                />
+                <MetaLine
+                  left={item.institution}
+                  right={item.score ? `GPA ${item.score}` : undefined}
+                  bodyFamily={t.bodyFamily}
+                  smallSize={t.small}
+                  muted={muted}
+                />
+                {item.description ? (
+                  <BulletList text={item.description} size={t.body} lineHeight={1.4} bulletColor={accent} />
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Skills */}
+      {hasItems(data.sections.skills) ? (
+        <section>
+          <SectionTitle title={data.sections.skills.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="accent-bar" align="center" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {items(data.sections.skills).map((item) => {
+              const keywords = (item.keywords || []).filter(Boolean);
+              return (
+                <div
+                  key={item.id}
+                  style={{
+                    fontFamily: t.bodyFamily,
+                    fontSize: t.body,
+                    lineHeight: 1.45,
+                    display: "flex",
+                    gap: 8,
+                  }}
+                >
+                  {item.name ? (
+                    <span style={{ fontWeight: 700, color: "inherit", minWidth: 120, flexShrink: 0 }}>{item.name}</span>
+                  ) : null}
+                  <span style={{ flex: 1 }}>{keywords.length ? keywords.join(", ") : item.description}</span>
                 </div>
-              ))}
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Certifications */}
+      {hasItems(data.sections.certifications) ? (
+        <section>
+          <SectionTitle title={data.sections.certifications.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="accent-bar" align="center" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {items(data.sections.certifications).map((item) => (
+              <div key={item.id} style={{ fontFamily: t.bodyFamily, fontSize: t.body }} className="resume-section-item">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                  <span>
+                    <span style={{ fontWeight: 700 }}>{item.name}</span>
+                    {item.issuer ? <span style={{ color: muted }}>{" — "}{item.issuer}</span> : null}
+                  </span>
+                  {item.date ? (
+                    <span style={{ fontSize: t.small, color: muted, whiteSpace: "nowrap" }}>{item.date}</span>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Awards */}
+      {hasItems(data.sections.awards) ? (
+        <section>
+          <SectionTitle title={data.sections.awards.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="accent-bar" align="center" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {items(data.sections.awards).map((item) => (
+              <div key={item.id} style={{ fontFamily: t.bodyFamily, fontSize: t.body }} className="resume-section-item">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                  <span>
+                    <span style={{ fontWeight: 700 }}>{item.title}</span>
+                    {item.awarder ? <span style={{ color: muted }}>{" — "}{item.awarder}</span> : null}
+                  </span>
+                  {item.date ? <span style={{ fontSize: t.small, color: muted, whiteSpace: "nowrap" }}>{item.date}</span> : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Languages / Interests inline row */}
+      {(hasItems(data.sections.languages) || hasItems(data.sections.interests)) ? (
+        <section style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+          {hasItems(data.sections.languages) ? (
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <SectionTitle title={data.sections.languages.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="plain" align="center" />
+              <div style={{ fontFamily: t.bodyFamily, fontSize: t.body, textAlign: "center" }}>
+                {items(data.sections.languages).map((l, i, a) => (
+                  <span key={l.id}>
+                    <strong>{l.name}</strong>
+                    {l.description ? <span style={{ color: muted }}> ({l.description})</span> : null}
+                    {i < a.length - 1 ? <span style={{ color: muted }}>{"  ·  "}</span> : null}
+                  </span>
+                ))}
+              </div>
             </div>
-          </GridRow>
-        )}
-
-        {/* Skills */}
-        {visible("skills") && (
-          <GridRow title={sections.skills.name} c={c} hf={hf}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
-              {getItems("skills").map((item: any) => (
-                <div key={item.id}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <span style={{ fontWeight: 700, fontSize: bf.fontSize - 1 }}>{item.name}</span>
-                      <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6, marginLeft: 6 }}>{proficiencyLabel(item.level)}</span>
-                    </div>
-                    <LevelSquares level={item.level} color={c.primary} />
-                  </div>
-                  {item.keywords?.length > 0 && (
-                    <div style={{ fontSize: bf.fontSize - 2, opacity: 0.5, marginTop: 2 }}>{item.keywords.join(", ")}</div>
-                  )}
-                </div>
-              ))}
+          ) : null}
+          {hasItems(data.sections.interests) ? (
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <SectionTitle title={data.sections.interests.name} color={accent} size={t.sectionSize} family={t.displayFamily} variant="plain" align="center" />
+              <div style={{ fontFamily: t.bodyFamily, fontSize: t.body, textAlign: "center", color: muted }}>
+                {items(data.sections.interests).map((i) => i.name).join(" · ")}
+              </div>
             </div>
-          </GridRow>
-        )}
-
-        {/* Experience */}
-        {visible("experience") && (
-          <GridRow title={sections.experience.name} c={c} hf={hf}>
-            {getItems("experience").map((item: any) => (
-              <div key={item.id} style={{ marginBottom: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <div>
-                    <span style={{ fontWeight: 700 }}>{item.company}</span>
-                    {item.location && <span style={{ opacity: 0.6 }}>, {item.location}</span>}
-                  </div>
-                  <span style={{ fontSize: bf.fontSize - 2, fontStyle: "italic", opacity: 0.6, whiteSpace: "nowrap" }}>{item.date}</span>
-                </div>
-                <div style={{ fontStyle: "italic", color: c.primary, fontSize: bf.fontSize - 1 }}>{item.position}</div>
-                {item.description && <div style={{ marginTop: 4 }}><BulletDescription text={item.description} fontSize={bf.fontSize} /></div>}
-              </div>
-            ))}
-          </GridRow>
-        )}
-
-        {/* Education */}
-        {visible("education") && (
-          <GridRow title={sections.education.name} c={c} hf={hf}>
-            {getItems("education").map((item: any) => (
-              <div key={item.id} style={{ marginBottom: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <span style={{ fontWeight: 700 }}>{item.institution}</span>
-                  <span style={{ fontSize: bf.fontSize - 2, fontStyle: "italic", opacity: 0.6 }}>{item.date}</span>
-                </div>
-                <div style={{ fontStyle: "italic", fontSize: bf.fontSize - 1, opacity: 0.8 }}>
-                  {item.studyType}{item.area && ` in ${item.area}`}{item.score && ` \u2014 ${item.score}`}
-                </div>
-                {item.description && <div style={{ marginTop: 3 }}><BulletDescription text={item.description} fontSize={bf.fontSize} /></div>}
-              </div>
-            ))}
-          </GridRow>
-        )}
-
-        {/* Projects */}
-        {visible("projects") && (
-          <GridRow title={sections.projects.name} c={c} hf={hf}>
-            {getItems("projects").map((item: any) => (
-              <div key={item.id} style={{ marginBottom: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <span style={{ fontWeight: 600 }}>{item.name}</span>
-                  {item.date && <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.date}</span>}
-                </div>
-                {item.description && <div style={{ marginTop: 3 }}><BulletDescription text={item.description} fontSize={bf.fontSize} /></div>}
-                {item.keywords?.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 4 }}>
-                    {item.keywords.map((kw: string, idx: number) => (
-                      <span key={idx} style={{ padding: "1px 6px", borderRadius: 3, backgroundColor: `${c.primary}12`, color: c.primary, fontSize: bf.fontSize - 2 }}>{kw}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </GridRow>
-        )}
-
-        {/* Awards */}
-        {visible("awards") && (
-          <GridRow title={sections.awards.name} c={c} hf={hf}>
-            {getItems("awards").map((item: any) => (
-              <div key={item.id} style={{ marginBottom: 6 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <span style={{ fontWeight: 600 }}>{item.title}</span>
-                  {item.date && <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.date}</span>}
-                </div>
-                {item.awarder && <div style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.awarder}</div>}
-                {item.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 2, whiteSpace: "pre-wrap" }}>{item.description}</p>}
-              </div>
-            ))}
-          </GridRow>
-        )}
-
-        {/* Certifications */}
-        {visible("certifications") && (
-          <GridRow title={sections.certifications.name} c={c} hf={hf}>
-            {getItems("certifications").map((item: any) => (
-              <div key={item.id} style={{ marginBottom: 4, fontSize: bf.fontSize - 1 }}>
-                <span style={{ fontWeight: 600 }}>{item.name}</span>
-                {item.issuer && <span style={{ opacity: 0.6 }}> \u2014 {item.issuer}</span>}
-                {item.date && <span style={{ fontSize: bf.fontSize - 2, opacity: 0.5 }}> ({item.date})</span>}
-              </div>
-            ))}
-          </GridRow>
-        )}
-
-        {/* Languages */}
-        {visible("languages") && (
-          <GridRow title={sections.languages.name} c={c} hf={hf}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 16px" }}>
-              {getItems("languages").map((item: any) => (
-                <span key={item.id} style={{ fontSize: bf.fontSize - 1 }}>
-                  <strong>{item.name}</strong>
-                  {item.description && <span style={{ opacity: 0.7 }}> \u2014 {item.description}</span>}
-                </span>
-              ))}
-            </div>
-          </GridRow>
-        )}
-
-        {/* Interests */}
-        {visible("interests") && (
-          <GridRow title={sections.interests.name} c={c} hf={hf}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {getItems("interests").map((item: any) => (
-                <span key={item.id} style={{ padding: "2px 8px", borderRadius: 3, backgroundColor: `${c.primary}12`, color: c.primary, fontSize: bf.fontSize - 2 }}>{item.name}</span>
-              ))}
-            </div>
-          </GridRow>
-        )}
-
-        {/* Volunteer */}
-        {visible("volunteer") && (
-          <GridRow title={sections.volunteer.name} c={c} hf={hf}>
-            {getItems("volunteer").map((item: any) => (
-              <div key={item.id} style={{ marginBottom: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <div>
-                    <span style={{ fontWeight: 600 }}>{item.position}</span>
-                    {item.organization && <span style={{ color: c.primary }}> at {item.organization}</span>}
-                  </div>
-                  <span style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.date}</span>
-                </div>
-                {item.description && <div style={{ marginTop: 3 }}><BulletDescription text={item.description} fontSize={bf.fontSize} /></div>}
-              </div>
-            ))}
-          </GridRow>
-        )}
-
-        {/* Publications */}
-        {visible("publications") && (
-          <GridRow title={sections.publications.name} c={c} hf={hf}>
-            {getItems("publications").map((item: any) => (
-              <div key={item.id} style={{ marginBottom: 6 }}>
-                <div style={{ fontWeight: 600 }}>{item.name}</div>
-                {item.publisher && <div style={{ fontSize: bf.fontSize - 2, opacity: 0.6 }}>{item.publisher}{item.date && ` \u2014 ${item.date}`}</div>}
-                {item.description && <p style={{ fontSize: bf.fontSize - 1, marginTop: 2, whiteSpace: "pre-wrap" }}>{item.description}</p>}
-              </div>
-            ))}
-          </GridRow>
-        )}
-
-        {/* References */}
-        {visible("references") && (
-          <GridRow title={sections.references.name} c={c} hf={hf}>
-            {getItems("references").map((item: any) => (
-              <div key={item.id} style={{ marginBottom: 6 }}>
-                <div style={{ fontWeight: 600 }}>{item.name}</div>
-                {item.description && <div style={{ opacity: 0.6, fontSize: bf.fontSize - 2 }}>{item.description}</div>}
-                {item.summary && <div style={{ fontStyle: "italic", opacity: 0.7, marginTop: 2, fontSize: bf.fontSize - 2 }}>&ldquo;{item.summary}&rdquo;</div>}
-              </div>
-            ))}
-          </GridRow>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function GridRow({
-  title,
-  c,
-  hf,
-  children,
-}: {
-  title: string;
-  c: { primary: string };
-  hf: { fontFamily: string; fontWeight: number; fontSize: number };
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "20% 80%",
-        borderTop: `1px solid ${c.primary}40`,
-        marginTop: 12,
-        paddingTop: 10,
-      }}
-    >
-      <div
-        style={{
-          fontFamily: hf.fontFamily,
-          fontWeight: hf.fontWeight,
-          fontSize: hf.fontSize * 0.65,
-          color: c.primary,
-          textTransform: "uppercase",
-          letterSpacing: 1,
-          lineHeight: 1.4,
-          paddingRight: 10,
-        }}
-      >
-        {title}
-      </div>
-      <div>{children}</div>
+          ) : null}
+        </section>
+      ) : null}
     </div>
   );
 }
