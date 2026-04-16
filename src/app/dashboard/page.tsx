@@ -180,6 +180,13 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href="/templates"
+              className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+            >
+              <FileText size={16} />
+              <span className="hidden sm:inline">Templates</span>
+            </Link>
             <button
               onClick={() => setImportOpen(true)}
               className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"

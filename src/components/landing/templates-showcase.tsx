@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "motion/react";
+import { ArrowRight } from "@phosphor-icons/react";
 import { MarqueeRows } from "@/components/animation/marquee";
 import { createSampleResumeData } from "@/lib/resume-sample";
 import { getTemplate, templateList } from "@/components/resume/templates";
@@ -76,6 +78,13 @@ export function TemplatesShowcase() {
         <p className="mt-4 text-muted-foreground max-w-lg mx-auto">
           Each template is designed to be ATS-friendly and visually striking.
         </p>
+        <Link
+          href="/templates"
+          className="mt-6 inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          Browse all templates
+          <ArrowRight size={14} weight="bold" />
+        </Link>
       </motion.div>
 
       <div className="-rotate-3 sm:-rotate-4 lg:-rotate-5">
