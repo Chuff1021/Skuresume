@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { getTemplate } from "@/components/resume/templates";
 import type { ResumeData } from "@/types/resume";
 
@@ -10,8 +10,17 @@ const A4_HEIGHT = 1123;
 const LETTER_WIDTH = 816;
 const LETTER_HEIGHT = 1056;
 
+declare global {
+  interface Window {
+    __RESUME_READY__?: boolean;
+  }
+}
+
 export default function PrintPage() {
   const { resumeId } = useParams<{ resumeId: string }>();
+  const search = useSearchParams();
+  const mode = search.get("mode"); // "pdf" => headless render, suppress UI & auto-print
+  const formatOverride = search.get("format"); // "a4" | "letter"
   const [data, setData] = useState<ResumeData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -32,12 +41,40 @@ export default function PrintPage() {
     load();
   }, [resumeId]);
 
+  // Signal readiness for the headless PDF renderer once fonts + layout settle.
   useEffect(() => {
+    if (!data || loading) return;
+    const format = formatOverride === "a4" || formatOverride === "letter" ? formatOverride : data.metadata.page.format;
+    document.documentElement.setAttribute("data-format", format);
+
+    let cancelled = false;
+    const signalReady = async () => {
+      try {
+        if ("fonts" in document) {
+          await (document as Document & { fonts: { ready: Promise<void> } }).fonts.ready;
+        }
+      } catch {
+        /* ignore font loading errors */
+      }
+      // Two rAFs to ensure layout has flushed.
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      if (!cancelled) {
+        window.__RESUME_READY__ = true;
+      }
+    };
+    signalReady();
+    return () => {
+      cancelled = true;
+    };
+  }, [data, loading, formatOverride]);
+
+  // Only trigger print in interactive mode; headless PDF uses page.pdf() directly.
+  useEffect(() => {
+    if (mode === "pdf") return;
     if (data && !loading) {
-      // Auto-trigger print after render
       setTimeout(() => window.print(), 500);
     }
-  }, [data, loading]);
+  }, [data, loading, mode]);
 
   if (loading) {
     return (
@@ -55,10 +92,12 @@ export default function PrintPage() {
     );
   }
 
-  const isLetter = data.metadata.page.format === "letter";
+  const formatResolved = formatOverride === "a4" || formatOverride === "letter" ? formatOverride : data.metadata.page.format;
+  const isLetter = formatResolved === "letter";
   const width = isLetter ? LETTER_WIDTH : A4_WIDTH;
   const height = isLetter ? LETTER_HEIGHT : A4_HEIGHT;
   const TemplateComponent = getTemplate(data.metadata.template);
+  const isHeadless = mode === "pdf";
 
   return (
     <>
@@ -68,35 +107,38 @@ export default function PrintPage() {
             margin: 0;
             size: ${isLetter ? "letter" : "A4"};
           }
-          body {
-            margin: 0;
-            padding: 0;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           .no-print { display: none !important; }
+          .print-page-frame { box-shadow: none !important; }
         }
         @media screen {
           body {
-            background: #f0f0f0;
+            background: ${isHeadless ? "#ffffff" : "#f0f0f0"};
             display: flex;
             justify-content: center;
-            padding: 24px;
+            padding: ${isHeadless ? "0" : "24px"};
           }
         }
       `}</style>
 
-      {/* Print button (screen only) */}
-      <button
-        onClick={() => window.print()}
-        className="no-print fixed top-4 right-4 z-50 px-4 py-2 rounded-md bg-black text-white text-sm font-medium shadow-lg hover:bg-black/80"
-      >
-        Save as PDF
-      </button>
+      {!isHeadless ? (
+        <button
+          onClick={() => window.print()}
+          className="no-print fixed top-4 right-4 z-50 px-4 py-2 rounded-md bg-black text-white text-sm font-medium shadow-lg hover:bg-black/80"
+        >
+          Save as PDF
+        </button>
+      ) : null}
 
       <div
+        className={isHeadless ? "print-page-frame" : "print-page-frame shadow-xl"}
         style={{ width, minHeight: height, backgroundColor: "#ffffff" }}
-        className="shadow-xl"
       >
         <TemplateComponent data={data} />
       </div>
