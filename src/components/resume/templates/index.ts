@@ -13,12 +13,18 @@ import { RhyhornTemplate } from "./rhyhorn";
 import { LeafishTemplate } from "./leafish";
 import { LaprasTemplate } from "./lapras";
 import { DitgarTemplate } from "./ditgar";
+import { ModernMinimalTemplate } from "./modern-minimal";
+import { ExecutiveClassicTemplate } from "./executive-classic";
+import { TwoColumnTechnicalTemplate } from "./two-column-technical";
 
 export interface TemplateProps {
   data: ResumeData;
 }
 
 export const templates: Record<string, { name: string; component: ComponentType<TemplateProps> }> = {
+  "modern-minimal": { name: "Modern Minimal", component: ModernMinimalTemplate },
+  "executive-classic": { name: "Executive Classic", component: ExecutiveClassicTemplate },
+  "two-column-technical": { name: "Two-Column Technical", component: TwoColumnTechnicalTemplate },
   onyx: { name: "Onyx", component: OnyxTemplate },
   ditto: { name: "Ditto", component: DittoTemplate },
   gengar: { name: "Gengar", component: GengarTemplate },

@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# PDF render samples (generated locally, not source of truth)
+/samples/*.pdf
+/samples/*.png
